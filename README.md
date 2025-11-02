@@ -1,11 +1,12 @@
 # stidantic [WIP]
 
-**This is work in progress, not compliant yet.**
+**This is work in progress, compliant but untested.**
 
 A Pydantic-based Python library for parsing, validating, and creating STIX 2.1 cyber threat intelligence data.
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Pydantic v2](https://img.shields.io/badge/pydantic-v2.12+-green.svg)](https://docs.pydantic.dev/)
+[![STIX v2.1](https://img.shields.io/badge/stix-v2.1+-red.svg)](https://oasis-open.github.io/cti-documentation/stix/intro)
 
 ## Overview
 
@@ -25,7 +26,7 @@ This library leverages [Pydantic](https://docs.pydantic.dev/) to provide:
 ### Requirements
 
 - Python 3.12 or later (uses PEP 695 type statements)
-- Pydantic > 2.10
+- Pydantic >= 2.12
 
 ## Quick Start
 
@@ -122,7 +123,7 @@ print(json_output)
 
 ## Roadmap
 
-- **Full STIX 2.1 Compliance**
+- ~~**Full STIX 2.1 Compliance**~~
 - **Python packaging**
 - **Extensive Testing**
 - Mind the datetime datatype serializer to follow the specification (convert to UTC).
