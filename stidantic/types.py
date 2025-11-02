@@ -231,7 +231,7 @@ class ExtensionType(Enum):
 
 
 class Extension(StixCore):
-    extension_type: ExtensionType
+    extension_type: ExtensionType | None = None
 
 
 # 3.2 Common Properties

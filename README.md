@@ -91,22 +91,22 @@ print(json_output)
 ### STIX Cyber-observable Objects (SCOs)
 - ✅ `Artifact` - Binary or file-like objects
 - ✅ `AutonomousSystem` - Autonomous System (AS) information
-- 🚧 `Directory` - A directory on a file system
-- 🚧 `Domain Name` - A network domain name
-- 🚧 `Email Address` - An email address
-- 🚧 `Email Message` - An email message
-- 🚧 `File` - A computer file
-- 🚧 `IPv4 Address` - An IPv4 address
-- 🚧 `IPv6 Address` - An IPv6 address
-- 🚧 `MAC Address` - A Media Access Control (MAC) address
-- 🚧 `Mutex` - A mutual exclusion object
-- 🚧 `Network Traffic` - A network traffic flow
-- 🚧 `Process` - A running process
-- 🚧 `Software` - A software product
-- 🚧 `URL` - A Uniform Resource Locator (URL)
-- 🚧 `User Account` - A user account on a system
-- 🚧 `Windows Registry Key` - A key in the Windows registry
-- 🚧 `X.509 Certificate` - An X.509 certificate
+- ✅ `Directory` - A directory on a file system
+- ✅ `Domain Name` - A network domain name
+- ✅ `Email Address` - An email address
+- ✅ `Email Message` - An email message
+- ✅ `File` - A computer file
+- ✅ `IPv4 Address` - An IPv4 address
+- ✅ `IPv6 Address` - An IPv6 address
+- ✅ `MAC Address` - A Media Access Control (MAC) address
+- ✅ `Mutex` - A mutual exclusion object
+- ✅ `Network Traffic` - A network traffic flow
+- ✅ `Process` - A running process
+- ✅ `Software` - A software product
+- ✅ `URL` - A Uniform Resource Locator (URL)
+- ✅ `User Account` - A user account on a system
+- ✅ `Windows Registry Key` - A key in the Windows registry
+- ✅ `X.509 Certificate` - An X.509 certificate
 
 ### STIX Relationship Objects (SROs)
 - ✅ `Relationship` - Connections between STIX objects
@@ -126,6 +126,9 @@ print(json_output)
 - **Python packaging**
 - **Extensive Testing**
 - Mind the datetime datatype serializer to follow the specification (convert to UTC).
+- Implement auto deterministic UUIv5 generation for STIX Identifiers.
+- Implement a Indicator to Observable export method (and the other way round ?).
+- Add Generics validation for Identifier properties that must be of some type.
 - Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.
 - TAXII 2.1 Server: Build a TAXII 2.1 compliant server using FastAPI.
 - OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) repository.
