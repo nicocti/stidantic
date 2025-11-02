@@ -70,23 +70,23 @@ print(json_output)
 ### STIX Domain Objects (SDOs)
 - ✅ `AttackPattern` - Ways adversaries attempt to compromise targets
 - ✅ `Campaign` - Grouping of adversarial behaviors over time
-- 🚧 `Course of Action` - Action taken to prevent or respond to an attack
-- 🚧 `Grouping` - Explicitly asserts that STIX Objects have a shared context
-- 🚧 `Identity` - Actual individuals, organizations, or groups
-- 🚧 `Incident` - A stub object representing a security incident
-- 🚧 `Indicator` - Pattern that can be used to detect suspicious or malicious activity
-- 🚧 `Infrastructure` - Systems, software services, and associated resources
-- 🚧 `Intrusion Set` - A grouped set of adversarial behaviors and resources
-- 🚧 `Location` - A geographic location
-- 🚧 `Malware` - A type of TTP that represents malicious code
-- 🚧 `Malware Analysis` - The results of a malware analysis
-- 🚧 `Note` - Analyst-created content and context
-- 🚧 `Observed Data` - Information about cyber security related entities
-- 🚧 `Opinion` - An assessment of the correctness of a STIX Object
-- 🚧 `Report` - Collections of threat intelligence
-- 🚧 `Threat Actor` - Actual individuals, groups, or organizations
-- 🚧 `Tool` - Legitimate software that can be used by threat actors
-- 🚧 `Vulnerability` - A mistake in software that can be used to compromise a system
+- ✅ `Course of Action` - Action taken to prevent or respond to an attack
+- ✅ `Grouping` - Explicitly asserts that STIX Objects have a shared context
+- ✅ `Identity` - Actual individuals, organizations, or groups
+- ✅ `Incident` - A stub object representing a security incident
+- ✅ `Indicator` - Pattern that can be used to detect suspicious or malicious activity
+- ✅ `Infrastructure` - Systems, software services, and associated resources
+- ✅ `Intrusion Set` - A grouped set of adversarial behaviors and resources
+- ✅ `Location` - A geographic location
+- ✅ `Malware` - A type of TTP that represents malicious code
+- ✅ `Malware Analysis` - The results of a malware analysis
+- ✅ `Note` - Analyst-created content and context
+- ✅ `Observed Data` - Information about cyber security related entities
+- ✅ `Opinion` - An assessment of the correctness of a STIX Object
+- ✅ `Report` - Collections of threat intelligence
+- ✅ `Threat Actor` - Actual individuals, groups, or organizations
+- ✅ `Tool` - Legitimate software that can be used by threat actors
+- ✅ `Vulnerability` - A mistake in software that can be used to compromise a system
 
 ### STIX Cyber-observable Objects (SCOs)
 - ✅ `Artifact` - Binary or file-like objects
@@ -125,6 +125,7 @@ print(json_output)
 - **Full STIX 2.1 Compliance**
 - **Python packaging**
 - **Extensive Testing**
+- Mind the datetime datatype serializer to follow the specification (convert to UTC).
 - Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.
 - TAXII 2.1 Server: Build a TAXII 2.1 compliant server using FastAPI.
 - OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) repository.
@@ -142,4 +143,4 @@ stidantic is released under the [MIT License](https://opensource.org/licenses/MI
 
 ## Acknowledgments
 
-This project implements the STIX 2.1 specification published by the OASIS Cyber Threat Intelligence (CTI) Technical Committee.
+This project implements the STIX 2.1 specification edited by Bret Jordan, Rich Piazza, and Trey Darley, published by the OASIS Cyber Threat Intelligence (CTI) Technical Committee.
