@@ -21,6 +21,9 @@ from stidantic.validators import (
     validate_bin_field,
     validate_hex_field,
 )
+from stidantic.common_validators import (
+    create_modified_after_created_validator,
+)
 
 
 # Common constraints on Stix dictionnary keys.
@@ -135,11 +138,10 @@ class Hashes(StixCore, extra="allow"):
         and MUST be no longer than 250 ASCII characters in length.
         The value MUST be a string in the appropriate format defined by the hash type indicated in the dictionary key.
         """
-        if self.__pydantic_extra__ and any(
-            not (len(key) > 250 or len(key) < 3 or StixKeyPattern.match(key))
-            for key in self.__pydantic_extra__.keys()
-        ):
-            raise ValueError("Invalid extra hash key.")
+        if self.__pydantic_extra__:
+            for key in self.__pydantic_extra__.keys():
+                if len(key) < 3 or len(key) > 250 or not StixKeyPattern.match(key):
+                    raise ValueError("Invalid extra hash key.")
         return self
 
 
@@ -337,17 +339,8 @@ class StixDomain(StixCommon):
     # version of an object if the created property was set.
     modified: datetime
 
-    @model_validator(mode="after")
-    def validate_modified_after_created(self) -> Self:
-        """
-        If the created property is defined, then the value of the modified property for a given object version
-        MUST be later than or equal to the value of the created property.
-        """
-        if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_modified = create_modified_after_created_validator()
 
 
 class StixObservable(StixCommon):
@@ -369,17 +362,8 @@ class StixRelationship(StixCommon):
     # created this object.
     created_by_ref: Identifier | None = None
 
-    @model_validator(mode="after")
-    def validate_modified_after_created(self) -> Self:
-        """
-        If the created property is defined, then the value of the modified property for a given object version
-        MUST be later than or equal to the value of the created property.
-        """
-        if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_modified = create_modified_after_created_validator()
 
 
 class StixMeta(StixCommon):
@@ -399,17 +383,8 @@ class StixLanguage(StixMeta):
     # version of an object if the created property was set.
     modified: datetime
 
-    @model_validator(mode="after")
-    def validate_modified_after_created(self) -> Self:
-        """
-        If the created property is defined, then the value of the modified property for a given object version
-        MUST be later than or equal to the value of the created property.
-        """
-        if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_modified = create_modified_after_created_validator()
 
 
 class StixMarking(StixMeta):
@@ -428,14 +403,5 @@ class StixExtension(StixMeta):
     # version of an object if the created property was set.
     modified: datetime
 
-    @model_validator(mode="after")
-    def validate_modified_after_created(self) -> Self:
-        """
-        If the created property is defined, then the value of the modified property for a given object version
-        MUST be later than or equal to the value of the created property.
-        """
-        if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_modified = create_modified_after_created_validator()
