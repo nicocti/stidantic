@@ -1,12 +1,21 @@
-from typing import Annotated, Literal, Any, Self
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field, GetCoreSchemaHandler
+from re import compile
+from datetime import datetime
+from typing import Annotated, Literal, Any, Self, Type, get_args  # pyright: ignore[reportDeprecated]
+from annotated_types import Ge, Le
+from typing_extensions import TypedDict
+
 from pydantic.functional_validators import AfterValidator, model_validator
 from pydantic.networks import AnyUrl, UrlConstraints
 from pydantic.types import Base64Bytes, StringConstraints
 from pydantic_core import CoreSchema, core_schema
-from datetime import datetime
-from re import compile
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    GetCoreSchemaHandler,
+    SerializeAsAny,
+)
 
 from stidantic.validators import (
     validate_bin_field,
@@ -73,7 +82,11 @@ class Identifier(str):
 
 class StixCore(BaseModel):
     model_config = ConfigDict(  # pyright: ignore[reportUnannotatedClassAttribute]
-        use_enum_values=True, validate_by_alias=True, frozen=True
+        use_enum_values=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+        frozen=True,
+        extra="allow",
     )
 
 
@@ -90,28 +103,28 @@ class Hashes(StixCore, extra="allow"):
 
     # Specifies the MD5 message digest algorithm. The corresponding hash string for this
     # value MUST be a valid MD5 message digest as defined in [RFC1321].
-    md5: Annotated[str | None, Field(alias="MD5")] = None
+    md5: Annotated[str | None, Field(serialization_alias="MD5")] = None
     # Specifies the SHA-1 (secure-hash algorithm 1) cryptographic hash function.
     # The corresponding hash string for this value MUST be a valid SHA-1 message digest as defined in [RFC3174].
-    sha1: Annotated[str | None, Field(alias="SHA-1")] = None
+    sha1: Annotated[str | None, Field(serialization_alias="SHA-1")] = None
     # Specifies the SHA-256 cryptographic hash function (part of the SHA2 family).
     # The corresponding hash string for this value MUST be a valid SHA-256 message digest as defined in [RFC6234].
-    sha256: Annotated[str | None, Field(alias="SHA-256")] = None
+    sha256: Annotated[str | None, Field(serialization_alias="SHA-256")] = None
     # Specifies the SHA-512 cryptographic hash function (part of the SHA2 family).
     # The corresponding hash string for this value MUST be a valid SHA-512 message digest as defined in [RFC6234].
-    sha512: Annotated[str | None, Field(alias="SHA-512")] = None
+    sha512: Annotated[str | None, Field(serialization_alias="SHA-512")] = None
     # Specifies the SHA3-256 cryptographic hash function. The corresponding hash string
     # for this value MUST be a valid SHA3-256 message digest as defined in [FIPS202].
-    sha3_256: Annotated[str | None, Field(alias="SHA3-256")] = None
+    sha3_256: Annotated[str | None, Field(serialization_alias="SHA3-256")] = None
     # Specifies the SHA3-512 cryptographic hash function. The corresponding hash string
     # for this value MUST be a valid SHA3-512 message digest as defined in [FIPS202].
-    sha3_512: Annotated[str | None, Field(alias="SHA3-512")] = None
+    sha3_512: Annotated[str | None, Field(serialization_alias="SHA3-512")] = None
     # Specifies the ssdeep fuzzy hashing algorithm. The corresponding hash string for this
     # value MUST be a valid piecewise hash as defined in the [SSDEEP] specification.
-    ssdeep: Annotated[str | None, Field(alias="SSDEEP")] = None
+    ssdeep: Annotated[str | None, Field(serialization_alias="SSDEEP")] = None
     # Specifies the TLSH fuzzy hashing algorithm. The corresponding hash string for this
     # value MUST be a valid 35 byte long hash as defined in the [TLSH] specification.
-    tlsh: Annotated[str | None, Field(alias="TLSH")] = None
+    tlsh: Annotated[str | None, Field(serialization_alias="TLSH")] = None
 
     @model_validator(mode="after")
     def lang_or_marking_ref(self) -> "Hashes":
@@ -234,6 +247,9 @@ class Extension(StixCore):
     extension_type: ExtensionType | None = None
 
 
+class ExtensionsDict(TypedDict, total=False, extra_items=SerializeAsAny[Extension]): ...  # noqa: E701
+
+
 # 3.2 Common Properties
 class StixCommon(StixCore):
     """
@@ -262,7 +278,7 @@ class StixCommon(StixCore):
     labels: list[str] | None = None
     # The confidence property identifies the confidence that the creator has in the correctness of their data.
     # The confidence value MUST be a number in the range of 0-100.
-    confidence: Annotated[int, Field(ge=0, le=100)] | None = None
+    confidence: Annotated[int, Ge(0), Le(100)] | None = None
     # The lang property identifies the language of the text content in this object.
     # When present, it MUST be a language code conformant to [RFC5646].
     # RFC5646 does not enforce ISO 639-1 alpha-2 or ISO 639-3 alpha-3 formats.
@@ -283,7 +299,29 @@ class StixCommon(StixCore):
     # If the extension_type property is not present, then this is a predefined extension which
     # does not use the extension facility described in section 7.3.
     # When this extension facility is used the extension_type property MUST be present.
-    extensions: dict[str, Extension] | None = None
+    extensions: ExtensionsDict | dict[str, Extension] | None = None
+
+    @classmethod
+    def register_new_extension(
+        cls,
+        definition: "StixCommon",  # pyright: ignore[reportUnusedParameter]
+        extension: Type[Extension],  # pyright: ignore[reportUnusedParameter, reportDeprecated]
+    ):
+        """
+        Dynamically update the extensions property so that new classes get deserialized based on the extension key.
+        """
+        annotations = get_args(cls.model_fields["extensions"].annotation)[0]  # pyright: ignore[reportAny, reportUnusedVariable]
+        CustomExtensionsDict = TypedDict(
+            "CustomExtensionsDict",
+            {
+                definition.id: extension,  # pyright: ignore[reportGeneralTypeIssues]
+                **annotations.__annotations__,  # pyright: ignore[reportGeneralTypeIssues]
+            },
+            total=False,
+            extra_items=SerializeAsAny[Extension],
+        )
+        cls.model_fields["extensions"].annotation = CustomExtensionsDict | None  # pyright: ignore[reportAttributeAccessIssue]
+        cls.model_rebuild(force=True)  # pyright: ignore[reportUnusedCallResult]
 
 
 class StixDomain(StixCommon):
@@ -318,7 +356,6 @@ class StixObservable(StixCommon):
 
 
 class StixRelationship(StixCommon):
-    type: Literal["relationship"] = "relationship"  # pyright: ignore[reportIncompatibleVariableOverride]
     relationship_type: str
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
@@ -402,8 +439,3 @@ class StixExtension(StixMeta):
                 "The modified property MUST be later than or equal to the value of the created property."
             )
         return self
-
-
-# 3.4 SCO Deterministic ID Creation
-# To enable deterministic IDs for STIX Cyber-observable Objects (SCOs), each SCO defines a set of one or more properties named "ID Contributing Properties". These properties MAY be used in the default calculation of the id when creating a SCO. In some cases, additional selection of extension properties that contribute to the ID may be described in the ID Contributing Properties section listed on each SCO. The default algorithm that creates the SCO ID based on those named properties is a UUIDv5 as defined in Section 2.9, however, other algorithms for creating the SCO ID MAY be used.
-# Deterministic IDs (UUIDv5) in the example SCOs contained in this specification were computed using the algorithm defined in section 2.9. Every attempt was made for these IDs to be accurate. Certain IDs which were used in reference properties of the examples did not include the actual object, and therefore it was impossible to accurately compute the appropriate UUIDv5. In these cases, a UUIDv4 was generated.

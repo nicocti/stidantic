@@ -66,6 +66,32 @@ json_output = campaign.model_dump_json(indent=2, exclude_none=True, by_alias=Tru
 print(json_output)
 ```
 
+### Handling property extensions
+
+```python
+from stidantic.marking import MarkingDefinition
+from stidantic.extensions.pap import PAPExtensionDefinition, PAPExtension
+
+MarkingDefinition.register_new_extension(PAPExtensionDefinition, PAPExtension)
+data = {
+    "id": "marking-definition--c43594d1-4b11-4c59-93ab-1c9b14d53ce9",
+    "type": "marking-definition",
+    "spec_version": "2.1",
+    "extensions": {
+        "extension-definition--f8d78575-edfd-406e-8e84-6162a8450f5b": {
+            "extension_type": "property-extension",
+            "pap": "green",
+        }
+    },
+    "created": "2022-10-01T00:00:00Z",
+    "name": "PAP:GREEN",
+}
+
+pap_green = MarkingDefinition.model_validate(data)
+if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
+    print("Extension was parsed & validated by Pydantic.")
+```
+
 ## Implemented STIX Objects
 
 ### STIX Domain Objects (SDOs)
@@ -132,7 +158,7 @@ print(json_output)
 - Add Generics validation for Identifier properties that must be of some type.
 - Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.
 - TAXII 2.1 Server: Build a TAXII 2.1 compliant server using FastAPI.
-- OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) repository.
+- OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) and [stix-common-objects](https://github.com/oasis-open/cti-stix-common-objects) repositories.
 - Performance Tuning: Profile and optimize parsing and serialization.
 
 ## Resources

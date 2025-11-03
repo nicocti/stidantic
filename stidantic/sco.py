@@ -1,11 +1,14 @@
 import ipaddress
-from typing import Any, Literal, Self
-from annotated_types import Ge, Le
-from pydantic.types import JsonValue
-from typing_extensions import Annotated
 from datetime import datetime
+from annotated_types import Ge, Le
+from typing_extensions import Annotated, TypedDict
+from typing import Any, Literal, Self
+
+from pydantic.functional_serializers import SerializeAsAny
 from pydantic.functional_validators import model_validator
+from pydantic.types import JsonValue
 from pydantic import Field
+
 from stidantic.types import (
     Extension,
     StixCore,
@@ -598,6 +601,20 @@ class WindowsPEBinaryExtension(Extension):
     sections: list[WindowsPESection] | None = None
 
 
+FileExtensions = TypedDict(
+    "FileExtensions",
+    {
+        "archive-ext": ArchiveFileExtension,
+        "ntfs-ext": NTFSFileExtension,
+        "pdf-ext": PDFFileExtension,
+        "raster-image-ext": RasterImageFileExtension,
+        "windows-pebinary-ext": WindowsPEBinaryExtension,
+    },
+    total=False,
+    extra_items=SerializeAsAny[Extension],
+)
+
+
 # 6.7 File Object
 class File(StixObservable):
     """
@@ -609,20 +626,7 @@ class File(StixObservable):
     # Dictionary keys MUST use the specification defined name (examples above) or be the id of a STIX Extension object,
     # depending on the type of extension being used.
     # The corresponding dictionary values MUST contain the contents of the extension instance.
-    extensions: (
-        dict[
-            str,
-            (
-                ArchiveFileExtension
-                | NTFSFileExtension
-                | PDFFileExtension
-                | RasterImageFileExtension
-                | WindowsPEBinaryExtension
-                | Extension
-            ),
-        ]
-        | None
-    ) = None
+    extensions: FileExtensions | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies a dictionary of hashes for the file.
     # When used with the Archive File Extension, this refers to the hash of the entire archive file, not its contents.
     hashes: Hashes | None = None
@@ -861,6 +865,19 @@ class TCPExtension(Extension):
         return self
 
 
+NetworkTrafficExtensions = TypedDict(
+    "NetworkTrafficExtensions",
+    {
+        "http-request-ext": HTTPRequestExtension,
+        "icmp-ext": ICMPExtension,
+        "socket-ext": NetworkSocketExtension,
+        "tcp-ext": TCPExtension,
+    },
+    total=False,
+    extra_items=SerializeAsAny[Extension],
+)
+
+
 # 6.12 Network Traffic Object
 class NetworkTraffic(StixObservable):
     """
@@ -878,17 +895,7 @@ class NetworkTraffic(StixObservable):
     # Dictionary keys MUST use the specification defined name (examples above) or be the id of a STIX Extension object,
     # depending on the type of extension being used.
     # The corresponding dictionary values MUST contain the contents of the extension instance.
-    extensions: (
-        dict[
-            str,
-            HTTPRequestExtension
-            | ICMPExtension
-            | NetworkSocketExtension
-            | TCPExtension
-            | Extension,
-        ]
-        | None
-    ) = None
+    extensions: NetworkTrafficExtensions | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies the date/time the network traffic was initiated, if known.
     start: datetime | None = None
     # Specifies the date/time the network traffic ended, if known.
@@ -1064,6 +1071,17 @@ class WindowsServiceExtension(Extension):
         raise TypeError("Input data must be a dictionary")
 
 
+ProcessExtensions = TypedDict(
+    "ProcessExtensions",
+    {
+        "windows-service-ext": WindowsServiceExtension,
+        "windows-process-ext": WindowsProcessExtension,
+    },
+    total=False,
+    extra_items=SerializeAsAny[Extension],
+)
+
+
 # 6.13 Process Object
 class Process(StixObservable):
     """
@@ -1077,9 +1095,7 @@ class Process(StixObservable):
     # Dictionary keys MUST use the specification defined name (examples above) or be the id of a STIX Extension object,
     # depending on the type of extension being used.
     # The corresponding dictionary values MUST contain the contents of the extension instance.
-    extensions: (
-        dict[str, WindowsProcessExtension | WindowsServiceExtension | Extension] | None
-    ) = None
+    extensions: ProcessExtensions | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies whether the process is hidden.
     is_hidden: bool | None = None
     # Specifies the Process ID, or PID, of the process.
@@ -1203,6 +1219,14 @@ class UnixAccountExtension(Extension):
         raise TypeError("Input data must be a dictionary")
 
 
+UserAccountExtensions = TypedDict(
+    "UserAccountExtensions",
+    {"unix-account-ext": UnixAccountExtension},
+    total=False,
+    extra_items=SerializeAsAny[Extension],
+)
+
+
 # 6.16 User Account Object
 class UserAccount(StixObservable):
     """
@@ -1215,7 +1239,7 @@ class UserAccount(StixObservable):
     # Dictionary keys MUST use the specification defined name (examples above) or be the id of a STIX Extension object,
     # depending on the type of extension being used.
     # The corresponding dictionary values MUST contain the contents of the extension instance.
-    extensions: dict[str, UnixAccountExtension | Extension] | None = None
+    extensions: UserAccountExtensions | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies the identifier of the account. The format of the identifier depends on the system the user account is
     # maintained in, and may be a numeric ID, a GUID, an account name, an email address, etc. The user_id property
     # should be populated with whatever field is the unique identifier for the system the account is a member of.
