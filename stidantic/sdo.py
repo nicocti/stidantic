@@ -8,6 +8,7 @@ from pydantic.functional_validators import model_validator
 
 from stidantic.types import Identifier, StixDomain, KillChainPhase, ExternalReference
 from stidantic.vocab import OpinionEnum
+from stidantic.common_validators import create_first_last_seen_validator
 
 
 # 4.1 Attack Pattern
@@ -76,17 +77,8 @@ class Campaign(StixDomain):
     # — what the Threat Actor or Intrusion Set hopes to accomplish with this Campaign.
     objective: str | None = None
 
-    @model_validator(mode="after")
-    def validate_last_seen_after_first_seen(self) -> Self:
-        """
-        If the last_seen property and the first_seen property are both defined, then the last_seen property
-        MUST be greater than or equal to the timestamp in the first_seen property.
-        """
-        if self.first_seen and self.last_seen and self.first_seen > self.last_seen:
-            raise ValueError(
-                "The last_seen property MUST be greater than or equal to the timestamp in the first_seen property"
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_last_seen = create_first_last_seen_validator()
 
 
 # 4.3 Course of Action
@@ -286,17 +278,8 @@ class Infrastructure(StixDomain):
     # The time that this Infrastructure was last seen performing malicious activities.
     last_seen: datetime | None = None
 
-    @model_validator(mode="after")
-    def validate_last_seen_after_first_seen(self) -> Self:
-        """
-        If the last_seen and the first_seen properties are both defined, then the last_seen property
-        MUST be greater than or equal to the timestamp in the first_seen property.
-        """
-        if self.first_seen and self.last_seen and self.first_seen > self.last_seen:
-            raise ValueError(
-                "The last_seen property MUST be greater than or equal to the timestamp in the first_seen property"
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_last_seen = create_first_last_seen_validator()
 
 
 # 4.9 Intrusion Set
@@ -352,17 +335,8 @@ class IntrusionSet(StixDomain):
     # The values for this property SHOULD come from the attack-motivation-ov open vocabulary.
     secondary_motivations: list[str] | None = None
 
-    @model_validator(mode="after")
-    def validate_last_seen_after_first_seen(self) -> Self:
-        """
-        If the last_seen and the first_seen properties are both defined, then the last_seen property
-        MUST be greater than or equal to the timestamp in the first_seen property.
-        """
-        if self.first_seen and self.last_seen and self.first_seen > self.last_seen:
-            raise ValueError(
-                "The last_seen property MUST be greater than or equal to the timestamp in the first_seen property"
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_last_seen = create_first_last_seen_validator()
 
 
 # 4.10 Location
@@ -501,17 +475,8 @@ class Malware(StixDomain):
     # this malware instance(s) or family.
     sample_refs: list[Identifier] | None = None
 
-    @model_validator(mode="after")
-    def validate_last_seen_after_first_seen(self) -> Self:
-        """
-        If the last_seen and the first_seen properties are both defined, then last_seen property
-        MUST be greater than or equal to the timestamp in the first_seen property.
-        """
-        if self.first_seen and self.last_seen and self.first_seen > self.last_seen:
-            raise ValueError(
-                "The last_seen property MUST be greater than or equal to the timestamp in the first_seen property"
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_last_seen = create_first_last_seen_validator()
 
     @model_validator(mode="after")
     def validate_name_if_is_family(self) -> Self:
@@ -849,17 +814,8 @@ class ThreatActor(StixDomain):
     # The position in the list has no significance.
     personal_motivations: list[str] | None = None
 
-    @model_validator(mode="after")
-    def validate_last_seen_after_first_seen(self) -> Self:
-        """
-        If the last_seen property and the first_seen property are both defined, then the last_seen property
-        MUST be greater than or equal to the timestamp in the first_seen property.
-        """
-        if self.first_seen and self.last_seen and self.first_seen > self.last_seen:
-            raise ValueError(
-                "The last_seen property MUST be greater than or equal to the timestamp in the first_seen property"
-            )
-        return self
+    # Use common validator to avoid code duplication
+    _validate_last_seen = create_first_last_seen_validator()
 
 
 # 4.18 Tool

@@ -28,6 +28,7 @@ from stidantic.vocab import (
     WindowsServiceType,
     WindowsRegistryDatatype,
 )
+from stidantic.common_validators import create_at_least_one_property_validator
 
 
 # 6.1 Artifact Object
@@ -545,18 +546,8 @@ class WindowsPEOptionalHeader(StixCore):
     # Specifies any hashes that were computed for the optional header.
     hashes: Hashes | None = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
-        """
-        An object using the Windows PE Optional Header Type MUST contain at least one property from this type.
-        """
-        if isinstance(data, dict):
-            for key, value in data.items():  # pyright: ignore[reportUnknownVariableType]
-                if key != "type" and value is not None:
-                    return data  # pyright: ignore[reportUnknownVariableType]
-            raise ValueError("At least one property must be present")
-        raise TypeError("Input data must be a dictionary")
+    # Use common validator to avoid code duplication
+    _at_least_one = create_at_least_one_property_validator()
 
 
 # 6.7.6 Windows PE Binary File Extension
