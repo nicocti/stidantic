@@ -150,7 +150,7 @@ if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
 ## Roadmap
 
 - ~~**Full STIX 2.1 Compliance**~~
-- **Python packaging**
+- ~~**Python packaging**~~
 - **Extensive Testing**
 - Mind the datetime datatype serializer to follow the specification (convert to UTC).
 - Implement auto deterministic UUIv5 generation for STIX Identifiers.
