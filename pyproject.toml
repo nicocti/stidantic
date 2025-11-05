@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic = ["version"]
+name = "stidantic"
+authors = [
+  { name="nicocti", email="nicocti@users.noreply.github.com" },
+]
+maintainers = [
+  { name="nicocti", email="nicocti@users.noreply.github.com" },
+]
+description = "A Pydantic-based Python library for parsing, validating, and creating STIX 2.1 cyber threat intelligence data."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.12",
+    "annotated-types>=0.6.0",
+    "typing-extensions>=4.14.1",
+]
+keywords = [
+    "stix",
+    "stix2",
+    "stix2.1",
+    "cti",
+    "pydantic",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+licence = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+"Homepage" = "https://github.com/nicocti/stidantic"
+"Bug Tracker" = "https://github.com/nicocti/stidantic/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["stidantic"]
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>[^']+)"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/stidantic",
+    "/README.md",
+    "/LICENSE",
+]
