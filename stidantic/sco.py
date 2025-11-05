@@ -1,32 +1,32 @@
 import ipaddress
-from datetime import datetime
-from annotated_types import Ge, Le
-from typing_extensions import Annotated, TypedDict
 from typing import Any, Literal, Self
 
+from annotated_types import Ge, Le
+from pydantic import Field
 from pydantic.functional_serializers import SerializeAsAny
 from pydantic.functional_validators import model_validator
 from pydantic.types import JsonValue
-from pydantic import Field
+from typing_extensions import Annotated, TypedDict
 
 from stidantic.types import (
     Extension,
-    StixCore,
-    StixObservable,
-    StixBinary,
-    StixUrl,
     Hashes,
     Identifier,
+    StixBinary,
+    StixCore,
+    StixObservable,
+    StixTimestamp,
+    StixUrl,
 )
 from stidantic.vocab import (
     EncryptionAlgorithm,
     NetworkSocketAddressFamily,
     NetworkSocketType,
     WindowsIntegrityLevel,
+    WindowsRegistryDatatype,
     WindowsServiceStartType,
     WindowsServiceStatus,
     WindowsServiceType,
-    WindowsRegistryDatatype,
 )
 
 
@@ -143,11 +143,11 @@ class Directory(StixObservable):
     # MUST be used instead.
     path_enc: str | None = None
     # Specifies the date/time the directory was created.
-    ctime: datetime | None = None
+    ctime: StixTimestamp | None = None
     # Specifies the date/time the directory was last written to/modified.
-    mtime: datetime | None = None
+    mtime: StixTimestamp | None = None
     # Specifies the date/time the directory was last accessed.
-    atime: datetime | None = None
+    atime: StixTimestamp | None = None
     # Specifies a list of references to other File and/or Directory objects contained within the directory.
     # The objects referenced in this list MUST be of type file or directory.
     contains_refs: list[Identifier] | None = None
@@ -261,7 +261,7 @@ class EmailMessage(StixObservable):
     # Indicates whether the email body contains multiple MIME parts.
     is_multipart: bool
     # Specifies the date/time that the email message was sent.
-    date: datetime | None = None
+    date: StixTimestamp | None = None
     # Specifies the value of the "Content-Type" header of the email message.
     content_type: str | None = None
     # Specifies the value of the "From:" header of the email message.
@@ -584,7 +584,7 @@ class WindowsPEBinaryExtension(Extension):
     number_of_sections: Annotated[int, Ge(0)] | None = None
     # Specifies the time when the PE binary was created.
     # The timestamp value MUST be precise to the second.
-    time_date_stamp: datetime | None = None
+    time_date_stamp: StixTimestamp | None = None
     # Specifies the file offset of the COFF symbol table.
     pointer_to_symbol_table_hex: str | None = None
     # Specifies the number of entries in the symbol table of the PE binary, as a non-negative integer.
@@ -653,11 +653,11 @@ class File(StixObservable):
     # interoperability.
     mime_type: str | None = None
     # Specifies the date/time the file was created.
-    ctime: datetime | None = None
+    ctime: StixTimestamp | None = None
     # Specifies the date/time the file was last written to/modified.
-    mtime: datetime | None = None
+    mtime: StixTimestamp | None = None
     # Specifies the date/time the file was last accessed.
-    atime: datetime | None = None
+    atime: StixTimestamp | None = None
     # Specifies the parent directory of the file, as a reference to a Directory object.
     parent_directory_ref: Identifier | None = None
     # Specifies a list of references to other Cyber-observable Objects contained within the file, such as another file
@@ -897,9 +897,9 @@ class NetworkTraffic(StixObservable):
     # The corresponding dictionary values MUST contain the contents of the extension instance.
     extensions: NetworkTrafficExtensions | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies the date/time the network traffic was initiated, if known.
-    start: datetime | None = None
+    start: StixTimestamp | None = None
     # Specifies the date/time the network traffic ended, if known.
-    end: datetime | None = None
+    end: StixTimestamp | None = None
     # Indicates whether the network traffic is still ongoing.
     is_active: bool | None = None
     # Specifies the source of the network traffic, as a reference to a Cyber-observable Object.
@@ -1101,7 +1101,7 @@ class Process(StixObservable):
     # Specifies the Process ID, or PID, of the process.
     pid: int | None = None
     # Specifies the date/time at which the process was created.
-    created_time: datetime | None = None
+    created_time: StixTimestamp | None = None
     # Specifies the current working directory of the process.
     cwd: str | None = None
     # Specifies the full command line used in executing the process, including the process name (which may be
@@ -1271,15 +1271,15 @@ class UserAccount(StixObservable):
     # Specifies if the account is disabled.
     is_disabled: bool | None = None
     # Specifies when the account was created.
-    account_created: datetime | None = None
+    account_created: StixTimestamp | None = None
     # Specifies the expiration date of the account.
-    account_expires: datetime | None = None
+    account_expires: StixTimestamp | None = None
     # Specifies when the account credential was last changed.
-    credential_last_changed: datetime | None = None
+    credential_last_changed: StixTimestamp | None = None
     # Specifies when the account was first accessed.
-    account_first_login: datetime | None = None
+    account_first_login: StixTimestamp | None = None
     # Specifies when the account was last accessed.
-    account_last_login: datetime | None = None
+    account_last_login: StixTimestamp | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -1344,7 +1344,7 @@ class WindowsRegistryKey(StixObservable):
     # fully expanded and not truncated; e.g., HKEY_LOCAL_MACHINE must be used instead of HKLM.
     values: list[WindowsRegistryValueType] | None = None
     # Specifies the last date/time that the registry key was modified.
-    modified_time: datetime | None = None
+    modified_time: StixTimestamp | None = None
     # Specifies a reference to the user account that created the registry key.
     # The object referenced in this property MUST be of type user-account.
     creator_user_ref: Identifier | None = None
@@ -1420,10 +1420,10 @@ class X509v3ExtensionsType(Extension):
     inhibit_any_policy: str | None = None
     # Specifies the date on which the validity period begins for the private key, if it is different from the
     # validity period of the certificate.
-    private_key_usage_period_not_before: datetime | None = None
+    private_key_usage_period_not_before: StixTimestamp | None = None
     # Specifies the date on which the validity period ends for the private key, if it is different from the
     # validity period of the certificate.
-    private_key_usage_period_not_after: datetime | None = None
+    private_key_usage_period_not_after: StixTimestamp | None = None
     # Specifies a sequence of one or more policy information terms, each of which consists of an object identifier
     # (OID) and optional qualifiers. Also equivalent to the object ID (OID) value of 2.5.29.32.
     certificate_policies: str | None = None
@@ -1467,9 +1467,9 @@ class X509Certificate(StixObservable):
     # Specifies the name of the Certificate Authority that issued the certificate.
     issuer: str | None = None
     # Specifies the date on which the certificate validity period begins.
-    validity_not_before: datetime | None = None
+    validity_not_before: StixTimestamp | None = None
     # Specifies the date on which the certificate validity period ends.
-    validity_not_after: datetime | None = None
+    validity_not_after: StixTimestamp | None = None
     # Specifies the name of the entity associated with the public key stored in the subject public key field of the
     # certificate.
     subject: str | None = None

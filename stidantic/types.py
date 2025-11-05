@@ -1,14 +1,16 @@
+from datetime import datetime
 from enum import Enum
 from re import compile
-from datetime import datetime
-from typing import Annotated, Literal, Any, Self, Type, get_args  # pyright: ignore[reportDeprecated]
-from annotated_types import Ge, Le
-from typing_extensions import TypedDict
+from typing import (  # pyright: ignore[reportDeprecated]
+    Annotated,
+    Any,
+    Literal,
+    Self,
+    Type,
+    get_args,
+)
 
-from pydantic.functional_validators import AfterValidator, model_validator
-from pydantic.networks import AnyUrl, UrlConstraints
-from pydantic.types import Base64Bytes, StringConstraints
-from pydantic_core import CoreSchema, core_schema
+from annotated_types import Ge, Le
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -16,12 +18,18 @@ from pydantic import (
     GetCoreSchemaHandler,
     SerializeAsAny,
 )
+from pydantic.functional_serializers import PlainSerializer
+from pydantic.functional_validators import AfterValidator, model_validator
+from pydantic.networks import AnyUrl, UrlConstraints
+from pydantic.types import Base64Bytes, StringConstraints
+from pydantic_core import CoreSchema, core_schema
+from typing_extensions import TypedDict
 
+from stidantic.serializers import ser_datetime
 from stidantic.validators import (
     validate_bin_field,
     validate_hex_field,
 )
-
 
 # Common constraints on Stix dictionnary keys.
 StixKeyPattern = compile(r"^[a-zA-Z0-9\-\_]+$")
@@ -60,6 +68,10 @@ type StixDict = dict[
     StixKey,
     Any,  # pyright: ignore[reportExplicitAny]
 ]
+
+# 2.16 Timestamp
+# The timestamp type defines how dates and times are represented in STIX.
+StixTimestamp = Annotated[datetime, PlainSerializer(ser_datetime)]
 
 
 # A URL reference to an external resource [RFC3986].
@@ -330,12 +342,12 @@ class StixDomain(StixCommon):
     created_by_ref: Identifier | None = None
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
-    created: datetime
+    created: StixTimestamp
     # The modified property is only used by STIX Objects that support versioning and represents
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
     # version of an object if the created property was set.
-    modified: datetime
+    modified: StixTimestamp
 
     @model_validator(mode="after")
     def validate_modified_after_created(self) -> Self:
@@ -359,12 +371,12 @@ class StixRelationship(StixCommon):
     relationship_type: str
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
-    created: datetime
+    created: StixTimestamp
     # The modified property is only used by STIX Objects that support versioning and represents
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
     # version of an object if the created property was set.
-    modified: datetime
+    modified: StixTimestamp
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
     created_by_ref: Identifier | None = None
@@ -386,7 +398,7 @@ class StixMeta(StixCommon):
     type: str
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
-    created: datetime
+    created: StixTimestamp
 
 
 class StixLanguage(StixMeta):
@@ -397,7 +409,7 @@ class StixLanguage(StixMeta):
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
     # version of an object if the created property was set.
-    modified: datetime
+    modified: StixTimestamp
 
     @model_validator(mode="after")
     def validate_modified_after_created(self) -> Self:
@@ -426,7 +438,7 @@ class StixExtension(StixMeta):
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
     # version of an object if the created property was set.
-    modified: datetime
+    modified: StixTimestamp
 
     @model_validator(mode="after")
     def validate_modified_after_created(self) -> Self:

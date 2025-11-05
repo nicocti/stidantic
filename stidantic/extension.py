@@ -1,7 +1,9 @@
-from typing import Literal, Annotated, Self
+from typing import Annotated, Literal, Self
+
 from pydantic import Field
 from pydantic.functional_validators import model_validator
-from stidantic.types import StixExtension, ExtensionType, StixProp
+
+from stidantic.types import ExtensionType, StixExtension, StixProp
 
 
 # 7.3 Extension Definition

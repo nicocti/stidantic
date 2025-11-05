@@ -1,12 +1,17 @@
-from datetime import datetime
-from typing import Any, Literal, Annotated, Self
-from typing_extensions import deprecated
-from annotated_types import Ge, Gt, Le
+from typing import Annotated, Any, Literal, Self
 
+from annotated_types import Ge, Gt, Le
 from pydantic import Field
 from pydantic.functional_validators import model_validator
+from typing_extensions import deprecated
 
-from stidantic.types import Identifier, StixDomain, KillChainPhase, ExternalReference
+from stidantic.types import (
+    ExternalReference,
+    Identifier,
+    KillChainPhase,
+    StixDomain,
+    StixTimestamp,
+)
 from stidantic.vocab import OpinionEnum
 
 
@@ -66,12 +71,12 @@ class Campaign(StixDomain):
     # A summary property of data from sightings and other data that may or may not be available in STIX.
     # If new sightings are received that are earlier than the first seen timestamp,
     # the object may be updated to account for the new data.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The time that this Campaign was last seen.
     # A summary property of data from sightings and other data that may or may not be available in STIX.
     # If new sightings are received that are later than the last seen timestamp,
     # the object may be updated to account for the new data.
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
     # The Campaign’s primary goal, objective, desired outcome, or intended effect
     # — what the Threat Actor or Intrusion Set hopes to accomplish with this Campaign.
     objective: str | None = None
@@ -236,12 +241,12 @@ class Indicator(StixDomain):
     # this object’s creation.
     pattern_version: str | None = None
     # The time from which this Indicator is considered a valid indicator of the behaviors it is related or represents.
-    valid_from: datetime
+    valid_from: StixTimestamp
     # The time at which this Indicator should no longer be considered a valid indicator of the behaviors it is
     # related to or represents.
     # If the valid_until property is omitted, then there is no constraint on the latest time for which the
     # Indicator is valid.
-    valid_until: datetime | None = None
+    valid_until: StixTimestamp | None = None
     # The kill chain phase(s) to which this Indicator corresponds.
     kill_chain_phases: list[KillChainPhase] | None = None
 
@@ -282,9 +287,9 @@ class Infrastructure(StixDomain):
     # The list of Kill Chain Phases for which this Infrastructure is used.
     kill_chain_phases: list[KillChainPhase] | None = None
     # The time that this Infrastructure was first seen performing malicious activities.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The time that this Infrastructure was last seen performing malicious activities.
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
 
     @model_validator(mode="after")
     def validate_last_seen_after_first_seen(self) -> Self:
@@ -329,12 +334,12 @@ class IntrusionSet(StixDomain):
     # A summary property of data from sightings and other data that may or may not be available in STIX.
     # If new sightings are received that are earlier than the first seen timestamp, the object may be updated to
     # account for the new data.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The time that this Intrusion Set was last seen.
     # This property is a summary property of data from sightings and other data that may or may not be available.
     # If new sightings are received that are later than the last seen timestamp, the object may be updated to
     # account for the new data.
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
     # The high-level goals of this Intrusion Set, namely, what are they trying to do.
     # For example, they may be motivated by personal gain, but their goal is to steal credit card numbers.
     # To do this, they may execute specific Campaigns that have detailed objectives like compromising point of sale
@@ -479,12 +484,12 @@ class Malware(StixDomain):
     # This property is a summary property of data from sightings and other data that may or may not be available in
     # STIX. If new sightings are received that are earlier than the first seen timestamp,
     # the object may be updated to account for the new data.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The time that the malware family or malware instance was last seen.
     # This property is a summary property of data from sightings and other data that may or may not be available in
     # STIX. If new sightings are received that are later than the last_seen timestamp,
     # the object may be updated to account for the new data.
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
     # The operating systems that the malware family or malware instance is executable on.
     # This applies to virtualized operating systems as well as those running on bare metal.
     operating_system_refs: list[Identifier] | None = None
@@ -565,11 +570,11 @@ class MalwareAnalysis(StixDomain):
     analysis_definition_version: str | None = None
     # The date and time that the malware was first submitted for scanning or analysis. This value will stay constant
     # while the scanned date can change. For example, when Malware was submitted to a virus analysis tool.
-    submitted: datetime | None = None
+    submitted: StixTimestamp | None = None
     # The date and time that the malware analysis was initiated.
-    analysis_started: datetime | None = None
+    analysis_started: StixTimestamp | None = None
     # The date and time that the malware analysis ended.
-    analysis_ended: datetime | None = None
+    analysis_ended: StixTimestamp | None = None
     # The classification result or name assigned to the malware instance by the scanner tool.
     result_name: str | None = None
     # The classification result as determined by the scanner or tool analysis process.
@@ -657,9 +662,9 @@ class ObservedData(StixDomain):
 
     type: Literal["observed-data"] = "observed-data"  # pyright: ignore[reportIncompatibleVariableOverride]
     # The beginning of the time window during which the data was seen.
-    first_observed: datetime
+    first_observed: StixTimestamp
     # The end of the time window during which the data was seen.
-    last_observed: datetime
+    last_observed: StixTimestamp
     # The number of times that each Cyber-observable object represented in the objects or object_refs property was
     # seen. If present, this MUST be an integer between 1 and 999,999,999 inclusive.
     # If the number_observed property is greater than 1, the data contained in the objects or object_refs property was
@@ -770,7 +775,7 @@ class Report(StixDomain):
     # The date that this Report object was officially published by the creator of this report.
     # The publication date (public release, legal release, etc.) may be different than the date the report was
     # created or shared internally (the date in the created property).
-    published: datetime
+    published: StixTimestamp
     # Specifies the STIX Objects that are referred to by this Report.
     object_refs: list[Identifier]
 
@@ -804,12 +809,12 @@ class ThreatActor(StixDomain):
     # This property is a summary property of data from sightings and other data that may or may not be available in
     # STIX. If new sightings are received that are earlier than the first seen timestamp, the object may be updated
     # to account for the new data.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The time that this Threat Actor was last seen.
     # This property is a summary property of data from sightings and other data that may or may not be available in
     # STIX. If new sightings are received that are later than the last seen timestamp, the object may be updated to
     # account for the new data
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
     # A list of roles the Threat Actor plays.
     # The values for this property SHOULD come from the threat-actor-role-ov open vocabulary.
     roles: list[str] | None = None

@@ -1,15 +1,14 @@
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Literal
-from datetime import datetime, timezone
 
 from stidantic.extension import ExtensionDefinition
+from stidantic.marking import MarkingDefinition
 from stidantic.types import (
     Extension,
     ExtensionType,
     Identifier,
 )
-from stidantic.marking import MarkingDefinition
-
 
 STIX_PAP_EXT_CREATION_DATE = datetime(2022, 11, 28, 00, 00, 00, 00, tzinfo=timezone.utc)
 CISA = Identifier("identity--b3bca3c2-1f3d-4b54-b44f-dac42c3a8f01")

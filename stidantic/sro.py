@@ -1,9 +1,10 @@
-from typing import Literal, Self, Annotated
-from datetime import datetime
+from typing import Annotated, Literal, Self
+
 from pydantic import Field
 from pydantic.functional_validators import model_validator
 from pydantic.types import PositiveInt
-from stidantic.types import StixRelationship, Identifier, StixType
+
+from stidantic.types import Identifier, StixRelationship, StixTimestamp, StixType
 
 
 # 5.1 Relationship
@@ -51,13 +52,13 @@ class Relationship(StixRelationship):
     # time at which relationship will be asserted to be true.
     # If it is not specified, then the earliest time at which the relationship between the objects exists
     # is not defined.
-    start_time: datetime | None = None
+    start_time: StixTimestamp | None = None
     # The latest time at which the Relationship between the objects exists. If this property is a future timestamp,
     # at the time the stop_time property is defined, then this represents an estimate by the producer of the
     # intelligence of the latest time at which relationship will be asserted to be true.
     # If stop_time is not specified, then the latest time at which the relationship between
     # the objects exists is either not known, not disclosed, or has no defined stop time.
-    stop_time: datetime | None = None
+    stop_time: StixTimestamp | None = None
 
     @model_validator(mode="after")
     def validate_start_stop_interval(self) -> Self:
@@ -110,9 +111,9 @@ class Sighting(StixRelationship):
     # A description that provides more details and context about the Sighting.
     description: str | None = None
     # The beginning of the time window during which the SDO referenced by the sighting_of_ref property was sighted.
-    first_seen: datetime | None = None
+    first_seen: StixTimestamp | None = None
     # The end of the time window during which the SDO referenced by the sighting_of_ref property was sighted.
-    last_seen: datetime | None = None
+    last_seen: StixTimestamp | None = None
     # If present, this MUST be an integer between 0 and 999,999,999 inclusive and represents the number of times the
     # SDO referenced by the sighting_of_ref property was sighted.
     # Observed Data has a similar property called number_observed, which refers to the number of times the data was

@@ -1,12 +1,14 @@
 from typing import Annotated
+
 from pydantic import Field
-from stidantic.types import StixCore, Identifier, StixCommon
-from stidantic.sdo import SDOs
-from stidantic.sco import SCOs
-from stidantic.sro import SROs
+
+from stidantic.extension import ExtensionDefinition
 from stidantic.language import LanguageContent
 from stidantic.marking import MarkingDefinition
-from stidantic.extension import ExtensionDefinition
+from stidantic.sco import SCOs
+from stidantic.sdo import SDOs
+from stidantic.sro import SROs
+from stidantic.types import Identifier, StixCommon, StixCore
 
 
 # 8. Stix Bundle

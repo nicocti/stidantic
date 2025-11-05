@@ -147,12 +147,15 @@ if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
 ### Bundle
 - ✅ `StixBundle` - Container for STIX objects
 
+### Extensions
+- ✅ `PAP` - Permissible Actions Protocol (PAP) extension from [Oasis](https://github.com/oasis-open/cti-stix-common-objects/blob/main/extension-definition-specifications/pap-marking-definition-f8d/STIX-2.1-PAP-marking-definition.adoc)
+
 ## Roadmap
 
 - ~~**Full STIX 2.1 Compliance**~~
 - ~~**Python packaging**~~
 - **Extensive Testing**
-- Mind the datetime datatype serializer to follow the specification (convert to UTC).
+- ~~Mind the datetime datatype serializer to follow the specification (convert to UTC).~~
 - Implement auto deterministic UUIv5 generation for STIX Identifiers.
 - Implement a Indicator to Observable export method (and the other way round ?).
 - Add Generics validation for Identifier properties that must be of some type.

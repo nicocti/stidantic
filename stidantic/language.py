@@ -1,6 +1,6 @@
-from datetime import datetime
 from typing import Literal
-from stidantic.types import Identifier, StixLanguage
+
+from stidantic.types import Identifier, StixLanguage, StixTimestamp
 
 
 # 7.1 Language Content
@@ -11,7 +11,7 @@ class LanguageContent(StixLanguage):
     object_ref: Identifier
     # The object_modified property identifies the modified time of the object that this Language Content applies to.
     # It MUST be an exact match for the modified time of the STIX Object being referenced.
-    object_modified: datetime | None = None
+    object_modified: StixTimestamp | None = None
     # The contents property contains the actual Language Content (translation).
     # The keys in the dictionary MUST be RFC 5646 language codes for which language content is being provided [RFC5646].
     # The values each consist of a dictionary that mirrors the properties in the target object

@@ -1,12 +1,13 @@
-from typing import Literal, Self
-from enum import Enum
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Literal, Self
 
 from pydantic.functional_validators import model_validator
+
 from stidantic.types import (
+    Identifier,
     StixCore,
     StixMarking,
-    Identifier,
 )
 
 
