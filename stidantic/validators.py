@@ -15,6 +15,6 @@ def validate_bin_field(value: str, info: ValidationInfo) -> str:
 
 
 def validate_hex_field(value: str, info: ValidationInfo) -> str:
-    if info.field_name and info.field_name.endswith("_hex"):
+    if info.field_name and not info.field_name.endswith("_hex"):
         raise ValueError("The property name MUST end with '_hex'.")
     return value
