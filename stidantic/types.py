@@ -368,7 +368,6 @@ class StixObservable(StixCommon):
 
 
 class StixRelationship(StixCommon):
-    relationship_type: str
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
     created: StixTimestamp

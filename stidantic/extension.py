@@ -109,7 +109,8 @@ class ExtensionDefinition(StixExtension):
         """
         if (
             self.extension_properties
-            and ExtensionType.toplevel_property_extension not in self.extension_types
+            and ExtensionType.toplevel_property_extension.value
+            not in self.extension_types
         ):
             raise ValueError(
                 "extension_types property can't be used without toplevel-property-extension in extension_types."

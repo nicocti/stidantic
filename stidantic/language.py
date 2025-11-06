@@ -1,5 +1,7 @@
 from typing import Literal
 
+from pydantic.types import JsonValue
+
 from stidantic.types import Identifier, StixLanguage, StixTimestamp
 
 
@@ -32,4 +34,4 @@ class LanguageContent(StixLanguage):
     # with the same key in the original.
     # The translation object MAY contain only a subset of the translatable fields of the original. Keys that point to
     # non-translatable properties in the target or to properties that do not exist in the target object MUST be ignored.
-    contents: dict[str, dict[str, str]]
+    contents: dict[str, dict[str, JsonValue]]

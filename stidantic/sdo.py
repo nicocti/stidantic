@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Literal, Self
 
-from annotated_types import Ge, Gt, Le
+from annotated_types import Ge, Le
 from pydantic import Field
 from pydantic.functional_validators import model_validator
 from typing_extensions import deprecated
@@ -670,7 +670,7 @@ class ObservedData(StixDomain):
     # If the number_observed property is greater than 1, the data contained in the objects or object_refs property was
     # seen multiple times. In these cases, object creators MAY omit properties of the SCO (such as timestamps) that are
     # specific to a single instance of that observed data.
-    number_observed: Annotated[int, Gt(1), Gt(999999999)]
+    number_observed: Annotated[int, Ge(1), Le(999999999)]
     # A dictionary of SCO representing the observation. The dictionary MUST contain at least one object.
     # The cyber observable content MAY include multiple objects if those objects are related as part of a single
     # observation. Multiple objects not related to each other via cyber observable Relationships MUST NOT be contained
