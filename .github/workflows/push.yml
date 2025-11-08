@@ -11,20 +11,19 @@ jobs:
     ruff:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
-              with:
-                  persist-credentials: false
+            - uses: actions/checkout@v5
             - uses: astral-sh/ruff-action@v3
               with:
                   args: check --output-format=github
     tests:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
+            - uses: actions/setup-python@v6
               with:
-                  persist-credentials: false
-            - uses: actions/setup-python@v5
-              with:
-                  python-version: "3.x"
+                  python-version-file: "pyproject.toml"
+            - uses: astral-sh/setup-uv@v6
             - name: Execute tests
-              run: python3 -m unittest discover
+              run: |
+                  uv pip install -r pyproject.toml --extra dev --system
+                  python3 -m unittest discover
