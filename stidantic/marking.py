@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Literal, Self
 
@@ -79,7 +79,7 @@ class MarkingDefinition(StixMarking):
         return self
 
 
-STIX_ZERO_DATE = datetime(2017, 1, 20, 00, 00, 00, 00, tzinfo=timezone.utc)
+STIX_ZERO_DATE = datetime(2017, 1, 20, 00, 00, 00, 00, tzinfo=UTC)
 
 
 class TLP(Enum):

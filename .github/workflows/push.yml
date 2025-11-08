@@ -1,0 +1,30 @@
+name: 🧪 Testing & linting on push
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    ruff:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+            - uses: astral-sh/ruff-action@v3
+              with:
+                  args: check --output-format=github
+    tests:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.x"
+            - name: Execute tests
+              run: python3 -m unittest discover

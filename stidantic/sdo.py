@@ -118,7 +118,7 @@ class CourseOfAction(StixDomain):
     # potentially including its purpose and its key characteristics.
     description: str | None = None
     # A reserved property that serves as a placeholder for future inclusion of machine automatable courses of action.
-    # action: str | None = None
+    # action: str | None = None  # noqa: ERA001
 
 
 # 4.4 Grouping
@@ -256,9 +256,7 @@ class Indicator(StixDomain):
         The valid_until property MUST be greater than the timestamp in the valid_from property.
         """
         if self.valid_from and self.valid_until and self.valid_from > self.valid_until:
-            raise ValueError(
-                "The valid_until property MUST be greater than the timestamp in the valid_from property"
-            )
+            raise ValueError("The valid_until property MUST be greater than the timestamp in the valid_from property")
         return self
 
 
@@ -428,14 +426,8 @@ class Location(StixDomain):
         - country
         - latitude and longitude
         """
-        if (
-            not self.region
-            and not self.country
-            and not (self.latitude and self.longitude)
-        ):
-            raise ValueError(
-                "At least one of region, country, or both latitude and longitude MUST be provided"
-            )
+        if not self.region and not self.country and not (self.latitude and self.longitude):
+            raise ValueError("At least one of region, country, or both latitude and longitude MUST be provided")
 
         if self.latitude and not self.longitude:
             raise ValueError("If latitude is present, longitude MUST be present")
@@ -444,9 +436,7 @@ class Location(StixDomain):
             raise ValueError("If longitude is present, latitude MUST be present")
 
         if self.precision and (not self.latitude or not self.longitude):
-            raise ValueError(
-                "If precision is present, latitude and longitude MUST be present"
-            )
+            raise ValueError("If precision is present, latitude and longitude MUST be present")
 
         return self
 
@@ -688,11 +678,7 @@ class ObservedData(StixDomain):
         """
         The last_observed property MUST be greater than or equal to the timestamp in the first_observed property.
         """
-        if (
-            self.first_observed
-            and self.last_observed
-            and self.first_observed > self.last_observed
-        ):
+        if self.first_observed and self.last_observed and self.first_observed > self.last_observed:
             raise ValueError(
                 "The last_observed property MUST be greater than or equal to the the first_observed property"
             )
@@ -705,9 +691,7 @@ class ObservedData(StixDomain):
         but both MUST NOT be present at the same time.
         """
         if self.objects is not None and self.object_refs is not None:
-            raise ValueError(
-                "The objects and object_refs properties MUST NOT be present at the same time"
-            )
+            raise ValueError("The objects and object_refs properties MUST NOT be present at the same time")
         if self.objects is None and self.object_refs is None:
             raise ValueError("Either objects or object_refs MUST be provided")
         return self

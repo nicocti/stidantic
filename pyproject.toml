@@ -42,6 +42,9 @@ classifiers = [
 licence = "MIT"
 license-files = ["LICENSE"]
 
+[project.optional-dependencies]
+dev = ["deepdiff"]
+
 [project.urls]
 "Homepage" = "https://github.com/nicocti/stidantic"
 "Bug Tracker" = "https://github.com/nicocti/stidantic/issues"
@@ -58,4 +61,144 @@ include = [
     "/stidantic",
     "/README.md",
     "/LICENSE",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+docstring-code-format = true
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"
+
+
+[tool.ruff.lint]
+ignore = [
+    "TRY003",  # Avoid specifying long messages outside the exception class
+    "RUF003",  # ambiguous-unicode-character-comment
+    "RUF012",  # mutable-class-default
+]
+select = [
+    # Pylint
+    "PLE", "PLW", "PLR", "PLC",
+    # pycodestyle
+    "E", "W",
+    # isort
+    "I",
+    # Pyflakes
+    "F",
+    # flake8-bugbear
+    "B",
+    # flake8-bandit
+    "S",
+    # pyupgrade
+    "UP",
+    # flake8-simplify
+    "SIM",
+    # flake8-annotations
+    "ANN",
+    # flake8-async
+    "ASYNC",
+    # flake8-blind-except
+    "BLE",
+    # flake8-boolean-trap
+    "FBT",
+    # flake8-builtins
+    "A",
+    # flake8-comprehensions
+    "C4",
+    # flake8-datetimez
+    "DTZ",
+    # flake8-debugger
+    "T10",
+    # flake8-gettext
+    "INT",
+    # flake8-implicit-str-concat
+    "ISC",
+    # flake8-logging
+    "LOG",
+    # flake8-logging-format
+    "G",
+    # flake8-no-pep420
+    "INP",
+    # flake8-pie
+    "PIE",
+    # flake8-print
+    "T20",
+    # flake8-quotes
+    "Q",
+    # flake8-raise
+    "RSE",
+    # flake8-return
+    "RET",
+    # flake8-self
+    "SLF",
+    # flake8-slots
+    "SLOT",
+    # flake8-tidy-imports
+    "TID",
+    # flake8-type-checking
+    "TC",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-use-pathlib
+    "PTH",
+    # flynt
+    "FLY",
+    # pep8-naming
+    "N",
+    # Perflint
+    "PERF",
+    # Pyflakes
+    "F",
+    # pygrep-hooks
+    "PGH",
+    # refurb
+    "FURB",
+    # Ruff-specific rules
+    "RUF",
+    # tryceratops
+    "TRY",
+    # eradicate
+    "ERA",
+    # pydoclint
+    # "DOC",
+    # pydocstyle
+    # "D",
+    # airflow
+    # "AIR",
+    # fastapi
+    # "FAST",
+    # flake8-2020
+    # "YTT",
+    # flake8-commas
+    # "COM",
+    # flake8-copyright
+    # "CPY",
+    # flake8-django
+    # "DJ",
+    # flake8-errmsg
+    # "EM",
+    # flake8-executable
+    # "EXE",
+    # flake8-fixme
+    # "FIX",
+    # flake8-future-annotations
+    # "FA",
+    # flake8-import-conventions
+    # "ICN",
+    # flake8-pyi
+    # "PYI",
+    # flake8-pytest-style
+    # "PT",
+    # flake8-todos
+    # "TD",
+    # mccabe
+    # "C90",
+    # NumPy-specific rules
+    # "NPY",
+    # pandas-vet
+    # "PD",
 ]

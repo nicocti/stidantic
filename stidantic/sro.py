@@ -142,7 +142,8 @@ class Sighting(StixRelationship):
     # The summary property indicates whether the Sighting should be considered summary data.
     # Summary data is an aggregation of previous Sightings reports and should not be considered primary source data.
     # Default value is false.
-    summary: bool | None = False
+    # WARN: Spec says it's a string, but description describes a boolean which defaults to false...
+    summary: bool | str | None = None
 
     @model_validator(mode="after")
     def validate_first_last_interval(self) -> Self:

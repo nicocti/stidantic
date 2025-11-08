@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 def ser_datetime(value: datetime) -> str:
@@ -12,6 +12,5 @@ def ser_datetime(value: datetime) -> str:
     truncated when stored as a UNIX timestamp or floating point number due to the precision of those formats.
     """
     if value.microsecond == 0:
-        return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    else:
-        return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")

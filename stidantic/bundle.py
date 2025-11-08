@@ -17,14 +17,7 @@ class StixBundle(StixCore):
     type: str = "bundle"
     objects: list[
         Annotated[
-            (
-                SROs
-                | SDOs
-                | SCOs
-                | MarkingDefinition
-                | LanguageContent
-                | ExtensionDefinition
-            ),
+            (SROs | SDOs | SCOs | MarkingDefinition | LanguageContent | ExtensionDefinition),
             Field(discriminator="type"),
         ]
         | StixCommon

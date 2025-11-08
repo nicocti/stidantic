@@ -1,7 +1,7 @@
+import re
 from datetime import datetime
 from enum import Enum
-from re import compile
-from typing import (  # pyright: ignore[reportDeprecated]
+from typing import (  # pyright: ignore[reportDeprecated]  # noqa: UP035
     Annotated,
     Any,
     Literal,
@@ -32,20 +32,18 @@ from stidantic.validators import (
 )
 
 # Common constraints on Stix dictionnary keys.
-StixKeyPattern = compile(r"^[a-zA-Z0-9\-\_]+$")
+StixKeyPattern = re.compile(r"^[a-zA-Z0-9\-\_]+$")
 StixKeyConstraint = StringConstraints(max_length=250, pattern=StixKeyPattern)
 StixKey = Annotated[str, StixKeyConstraint]
 
 # Common constraints on Stix type names.
-StixTypePattern = compile(r"^[a-zA-Z0-9\-]+$")
+StixTypePattern = re.compile(r"^[a-zA-Z0-9\-]+$")
 StixTypeConstraint = StringConstraints(pattern=StixTypePattern)
 StixType = Annotated[str, StixTypeConstraint]
 
 # Common constraints on Stix property names.
-StixPropPattern = compile(r"^[a-zA-Z0-9\_]+$")
-StixPropConstraint = StringConstraints(
-    min_length=3, max_length=250, pattern=StixPropPattern
-)
+StixPropPattern = re.compile(r"^[a-zA-Z0-9\_]+$")
+StixPropConstraint = StringConstraints(min_length=3, max_length=250, pattern=StixPropPattern)
 StixProp = Annotated[str, StixPropConstraint]
 
 # 2.1 Binary
@@ -80,10 +78,12 @@ type StixUrl = Annotated[AnyUrl, UrlConstraints(preserve_empty_path=True)]
 
 # 2.9 Identifier
 class Identifier(str):
+    __slots__ = ()
+
     @classmethod
     def __get_pydantic_core_schema__(
         cls,
-        source_type: Any,  # pyright: ignore[reportExplicitAny, reportAny]
+        source_type: Any,  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         handler: GetCoreSchemaHandler,
     ) -> CoreSchema:
         return core_schema.no_info_after_validator_function(cls, handler(str))
@@ -148,8 +148,8 @@ class Hashes(StixCore, extra="allow"):
         The value MUST be a string in the appropriate format defined by the hash type indicated in the dictionary key.
         """
         if self.__pydantic_extra__ and any(
-            not (len(key) > 250 or len(key) < 3 or StixKeyPattern.match(key))
-            for key in self.__pydantic_extra__.keys()
+            not (len(key) > 250 or len(key) < 3 or StixKeyPattern.match(key))  # noqa: PLR2004
+            for key in self.__pydantic_extra__
         ):
             raise ValueError("Invalid extra hash key.")
         return self
@@ -177,6 +177,7 @@ class ExternalReference(StixCore):
     external_id: str | None = None
 
     @model_validator(mode="before")
+    @classmethod
     def at_least_one(cls, values: dict[str, str]) -> dict[str, str]:
         """
         In addition to the source_name property, at least one of the description, url,
@@ -238,9 +239,7 @@ class GranularMarking(StixCore):
     @model_validator(mode="after")
     def lang_or_marking_ref(self) -> "GranularMarking":
         if self.lang and self.marking_ref:
-            raise ValueError(
-                "Both lang and marking_ref properties MUST NOT be present."
-            )
+            raise ValueError("Both lang and marking_ref properties MUST NOT be present.")
         if not self.lang and not self.marking_ref:
             raise ValueError("Either lang or marking_ref property MUST be present.")
         return self
@@ -259,7 +258,7 @@ class Extension(StixCore):
     extension_type: ExtensionType | None = None
 
 
-class ExtensionsDict(TypedDict, total=False, extra_items=SerializeAsAny[Extension]): ...  # noqa: E701
+class ExtensionsDict(TypedDict, total=False, extra_items=SerializeAsAny[Extension]): ...
 
 
 # 3.2 Common Properties
@@ -317,8 +316,8 @@ class StixCommon(StixCore):
     def register_new_extension(
         cls,
         definition: "StixCommon",  # pyright: ignore[reportUnusedParameter]
-        extension: Type[Extension],  # pyright: ignore[reportUnusedParameter, reportDeprecated]
-    ):
+        extension: Type[Extension],  # pyright: ignore[reportUnusedParameter, reportDeprecated]  # noqa: UP006
+    ) -> None:
         """
         Dynamically update the extensions property so that new classes get deserialized based on the extension key.
         """
@@ -356,9 +355,11 @@ class StixDomain(StixCommon):
         MUST be later than or equal to the value of the created property.
         """
         if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
+            created = self.created
+            modified = self.modified
+            self.created = modified
+            self.modified = created
+            return self
         return self
 
 
@@ -387,9 +388,11 @@ class StixRelationship(StixCommon):
         MUST be later than or equal to the value of the created property.
         """
         if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
+            created = self.created
+            modified = self.modified
+            self.created = modified
+            self.modified = created
+            return self
         return self
 
 
@@ -417,9 +420,7 @@ class StixLanguage(StixMeta):
         MUST be later than or equal to the value of the created property.
         """
         if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
+            raise ValueError("The modified property MUST be later than or equal to the value of the created property.")
         return self
 
 
@@ -446,7 +447,9 @@ class StixExtension(StixMeta):
         MUST be later than or equal to the value of the created property.
         """
         if self.created > self.modified:
-            raise ValueError(
-                "The modified property MUST be later than or equal to the value of the created property."
-            )
+            created = self.created
+            modified = self.modified
+            self.created = modified
+            self.modified = created
+            return self
         return self

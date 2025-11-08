@@ -446,9 +446,7 @@ class DNSRecord(Enum):
     # by retrying the lookup with the new name.
     CSYNC = "CSYNC"  # Child-to-Parent Synchronization : Specify a synchronization mechanism between a child
     # and a parent DNS zone. Typical example is declaring the same NS records in the parent and the child zone
-    DHCID = (
-        "DHCID"  # DHCP identifier : Used in conjunction with the FQDN option to DHCP
-    )
+    DHCID = "DHCID"  # DHCP identifier : Used in conjunction with the FQDN option to DHCP
     DLV = "DLV"  # DNSSEC Lookaside Validation record : For publishing DNSSEC trust anchors outside of the
     # DNS delegation chain. Uses the same format as the DS record. RFC 5074 describes a way of using these records.
     DNAME = "DNAME"  # Delegation name record : Alias for a name and all its subnames, unlike CNAME, which is an alias

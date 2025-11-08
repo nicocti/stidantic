@@ -1,12 +1,12 @@
 import ipaddress
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from annotated_types import Ge, Le
 from pydantic import Field
 from pydantic.functional_serializers import SerializeAsAny
 from pydantic.functional_validators import model_validator
 from pydantic.types import JsonValue
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
 from stidantic.types import (
     Extension,
@@ -75,9 +75,7 @@ class Artifact(StixObservable):
         The url property MUST NOT be present if payload_bin is provided.
         """
         if self.payload_bin and self.url:
-            raise ValueError(
-                "The url property MUST NOT be present if payload_bin is provided"
-            )
+            raise ValueError("The url property MUST NOT be present if payload_bin is provided")
         return self
 
     @model_validator(mode="after")
@@ -95,15 +93,11 @@ class Artifact(StixObservable):
         The decryption_key property MUST NOT be present when the encryption_algorithm property is absent.
         """
         if not self.encryption_algorithm and self.decryption_key:
-            raise ValueError(
-                "The decryption_key MUST NOT be present when the encryption_algorithm property is absent"
-            )
+            raise ValueError("The decryption_key MUST NOT be present when the encryption_algorithm property is absent")
         return self
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["hashes", "payload_bin"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["hashes", "payload_bin"]}
 
 
 # 6.2 Autonomous System
@@ -122,9 +116,7 @@ class AutonomousSystem(StixObservable):
     rir: str | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["number"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["number"]}
 
 
 # 6.3 Directory Object
@@ -153,9 +145,7 @@ class Directory(StixObservable):
     contains_refs: list[Identifier] | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["path"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["path"]}
 
 
 # 6.4 Domain Name Object
@@ -179,9 +169,7 @@ class DomainName(StixObservable):
     resolves_to_refs: list[Identifier] | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.5 Email Address Object
@@ -202,9 +190,7 @@ class EmailAddress(StixObservable):
     belongs_to_ref: Identifier | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.6.2 Email MIME Component Type
@@ -313,9 +299,7 @@ class EmailMessage(StixObservable):
         return self
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["from_ref", "subject", "body"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["from_ref", "subject", "body"]}
 
 
 # 6.7.2 Archive File Extension
@@ -547,7 +531,7 @@ class WindowsPEOptionalHeader(StixCore):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         An object using the Windows PE Optional Header Type MUST contain at least one property from this type.
         """
@@ -704,9 +688,7 @@ class IPv4Address(StixObservable):
     belongs_to_refs: list[Identifier] | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.9 IPv6 Address Object
@@ -726,9 +708,7 @@ class IPv6Address(StixObservable):
     belongs_to_refs: list[Identifier] | None = None
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.10 MAC Address Object
@@ -745,9 +725,7 @@ class MACAddress(StixObservable):
     value: str
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.11 Mutex Object
@@ -761,9 +739,7 @@ class Mutex(StixObservable):
     name: str
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["name"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["name"]}
 
 
 # 6.12.2 HTTP Request Extension
@@ -956,9 +932,7 @@ class NetworkTraffic(StixObservable):
         If the is_active property is true, then the end property MUST NOT be included.
         """
         if self.is_active and self.end is not None:
-            raise ValueError(
-                "The end property MUST NOT be included if is_active is true"
-            )
+            raise ValueError("The end property MUST NOT be included if is_active is true")
         if self.start and self.end and self.start > self.end:
             raise ValueError("The end property MUST be greater than or equal to start")
         return self
@@ -1018,7 +992,7 @@ class WindowsProcessExtension(Extension):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         An object using the Windows Process Extension MUST contain at least one property from this extension.
         """
@@ -1058,7 +1032,7 @@ class WindowsServiceExtension(Extension):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         As all properties of this extension are optional, at least one of the properties defined below MUST be
         included when using this extension.
@@ -1126,7 +1100,7 @@ class Process(StixObservable):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         A Process object MUST contain at least one property (other than type)
         from this object (or one of its extensions).
@@ -1182,9 +1156,7 @@ class URL(StixObservable):
     value: StixUrl
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["value"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
 
 
 # 6.16.2 UNIX Account Extension
@@ -1207,7 +1179,7 @@ class UnixAccountExtension(Extension):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         An object using the UNIX Account Extension MUST contain at least one property from this extension.
         """
@@ -1283,7 +1255,7 @@ class UserAccount(StixObservable):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         As all properties of this object are optional, at least one of the properties defined below
         MUST be included when using this object.
@@ -1317,7 +1289,7 @@ class WindowsRegistryValueType(StixCore):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         As all properties of this object are optional, at least one of the properties defined below
         MUST be included when using this object.
@@ -1353,7 +1325,7 @@ class WindowsRegistryKey(StixObservable):
 
     @model_validator(mode="before")
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         As all properties of this object are optional, at least one of the properties defined below
         MUST be included when using this object.
@@ -1366,9 +1338,7 @@ class WindowsRegistryKey(StixObservable):
         raise TypeError("Input data must be a dictionary")
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["key", "values"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["key", "values"]}
 
 
 # 6.18.2 X.509 v3 Extensions Type
@@ -1433,7 +1403,7 @@ class X509v3ExtensionsType(Extension):
     policy_mappings: str | None = None
 
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         An object using the X.509 v3 Extensions type MUST contain at least one property from this type.
         """
@@ -1483,7 +1453,7 @@ class X509Certificate(StixObservable):
     x509_v3_extensions: X509v3ExtensionsType | None = None
 
     @classmethod
-    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny]
+    def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
         """
         An X.509 Certificate object MUST contain at least one object specific property (other than type)
         from this object.
@@ -1496,9 +1466,7 @@ class X509Certificate(StixObservable):
         raise TypeError("Input data must be a dictionary")
 
     class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["hashes", "serial_number"]
-        }
+        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["hashes", "serial_number"]}
 
 
 SCOs = Annotated[
