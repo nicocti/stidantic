@@ -1,14 +1,17 @@
+import json
 import re
 from datetime import datetime
 from enum import Enum
 from typing import (  # noqa: UP035
     Annotated,
     Any,
+    ClassVar,
     Literal,
     Self,
     Type,  # pyright: ignore[reportDeprecated]
     get_args,
 )
+from uuid import UUID, uuid4, uuid5
 
 from annotated_types import Ge, Le
 from pydantic import (
@@ -26,10 +29,13 @@ from pydantic_core import CoreSchema, core_schema
 from typing_extensions import TypedDict
 
 from stidantic.serializers import ser_datetime
+from stidantic.utils import choose_one_hash
 from stidantic.validators import (
     validate_bin_field,
     validate_hex_field,
 )
+
+UUIDv5_NAMESPACE = UUID("00abedb4-aa42-466c-9c01-fed23315a9b7")
 
 # Common constraints on Stix dictionnary keys.
 StixKeyPattern = re.compile(r"^[a-zA-Z0-9\-\_]+$")
@@ -270,12 +276,15 @@ class StixCommon(StixCore):
     and which are not in use.
     """
 
+    # List of ID-contributing properties for UUIDv5 deterministic ID generation.
+    # Do not appear in model instances as it is a ClassVar.
+    id_contributing_properties: ClassVar[list[str] | None] = None
     # All STIX Objects and the STIX Bundle Object have an id property that uniquely identifies each instance
     # of the object.
     # This id MUST meet the requirements of the identifier type (see section 2.9).
     # For objects that support versioning, all objects with the same id are considered different versions
     # of the same object and the version of the object is identified by its modified property.
-    id: Identifier
+    id: Identifier = Identifier("")
     # The type property identifies the type of STIX Object.
     type: str
     # The value of this property MUST be 2.1 for STIX Objects defined according to this specification.
@@ -333,6 +342,25 @@ class StixCommon(StixCore):
         )
         cls.model_fields["extensions"].annotation = CustomExtensionsDict | None  # pyright: ignore[reportAttributeAccessIssue]
         cls.model_rebuild(force=True)  # pyright: ignore[reportUnusedCallResult]
+
+    @model_validator(mode="after")
+    def generate_id(self) -> Self:
+        if not self.id:
+            if self.id_contributing_properties:
+                id_contributing = self.model_dump(
+                    mode="json",
+                    by_alias=True,
+                    exclude_none=True,
+                    include=dict.fromkeys(self.id_contributing_properties, True),
+                )
+                if "hashes" in id_contributing:
+                    id_contributing["hashes"] = choose_one_hash(id_contributing["hashes"])  # pyright: ignore[reportAny]
+                serialized = json.dumps(id_contributing, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+                uuid = uuid5(UUIDv5_NAMESPACE, serialized)
+            else:
+                uuid = uuid4()
+            self.__dict__["id"] = f"{self.type}--{uuid}"
+        return self
 
 
 class StixDomain(StixCommon):

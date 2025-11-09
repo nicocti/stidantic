@@ -53,7 +53,6 @@ from stidantic.sdo import Campaign
 from stidantic.types import Identifier
 
 campaign = Campaign(
-    id=Identifier("campaign--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f"),
     created=datetime.now(),
     modified=datetime.now(),
     name="Operation Stealth",
@@ -74,9 +73,6 @@ from stidantic.extensions.pap import PAPExtensionDefinition, PAPExtension
 
 MarkingDefinition.register_new_extension(PAPExtensionDefinition, PAPExtension)
 data = {
-    "id": "marking-definition--c43594d1-4b11-4c59-93ab-1c9b14d53ce9",
-    "type": "marking-definition",
-    "spec_version": "2.1",
     "extensions": {
         "extension-definition--f8d78575-edfd-406e-8e84-6162a8450f5b": {
             "extension_type": "property-extension",
@@ -156,7 +152,7 @@ if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
 - ~~**Python packaging**~~
 - **Extensive Testing**
 - ~~Mind the datetime datatype serializer to follow the specification (convert to UTC).~~
-- Implement auto deterministic UUIv5 generation for STIX Identifiers.
+- ~~Implement auto deterministic UUIv5 generation for STIX Identifiers.~~
 - Implement a Indicator to Observable export method (and the other way round ?).
 - Add Generics validation for Identifier properties that must be of some type.
 - Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.

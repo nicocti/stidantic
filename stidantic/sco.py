@@ -1,5 +1,5 @@
 import ipaddress
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, ClassVar, Literal, Self
 
 from annotated_types import Ge, Le
 from pydantic import Field
@@ -59,6 +59,7 @@ class Artifact(StixObservable):
     # Specifies the decryption key for the encrypted binary data (either via payload_bin or url). For example,
     # this may be useful in cases of sharing malware samples, which are often encoded in an encrypted archive.
     decryption_key: str | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = ["hashes", "payload_bin"]
 
     @model_validator(mode="after")
     def at_least_one_of(self) -> Self:
@@ -96,9 +97,6 @@ class Artifact(StixObservable):
             raise ValueError("The decryption_key MUST NOT be present when the encryption_algorithm property is absent")
         return self
 
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["hashes", "payload_bin"]}
-
 
 # 6.2 Autonomous System
 class AutonomousSystem(StixObservable):
@@ -114,9 +112,7 @@ class AutonomousSystem(StixObservable):
     name: str | None = None
     # Specifies the name of the Regional Internet Registry (RIR) that assigned the number to the AS.
     rir: str | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["number"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["number"]
 
 
 # 6.3 Directory Object
@@ -143,9 +139,7 @@ class Directory(StixObservable):
     # Specifies a list of references to other File and/or Directory objects contained within the directory.
     # The objects referenced in this list MUST be of type file or directory.
     contains_refs: list[Identifier] | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["path"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["path"]
 
 
 # 6.4 Domain Name Object
@@ -167,9 +161,7 @@ class DomainName(StixObservable):
     # The objects referenced in this list MUST be of type ipv4-addr or ipv6-addr or domain-name
     # (for cases such as CNAME records).
     resolves_to_refs: list[Identifier] | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.5 Email Address Object
@@ -188,9 +180,7 @@ class EmailAddress(StixObservable):
     # Specifies the user account that the email address belongs to, as a reference to a User Account object.
     # The object referenced in this property MUST be of type user-account.
     belongs_to_ref: Identifier | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.6.2 Email MIME Component Type
@@ -285,6 +275,7 @@ class EmailMessage(StixObservable):
     # Specifies the raw binary contents of the email message, including both the headers and body, as a reference
     # to an Artifact object. The object referenced in this property MUST be of type artifact.
     raw_email_ref: Identifier | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = ["from_ref", "subject", "body"]
 
     @model_validator(mode="after")
     def validate_body(self) -> Self:
@@ -297,9 +288,6 @@ class EmailMessage(StixObservable):
         if not self.is_multipart and self.body_multipart is not None:
             raise ValueError("body_multipart MUST NOT be used if is_multipart is false")
         return self
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["from_ref", "subject", "body"]}
 
 
 # 6.7.2 Archive File Extension
@@ -650,6 +638,12 @@ class File(StixObservable):
     contains_refs: list[Identifier] | None = None
     # Specifies the content of the file, represented as an Artifact object.
     content_ref: Identifier | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = [
+        "hashes",
+        "name",
+        "extensions",
+        "parent_directory_ref",
+    ]
 
     @model_validator(mode="after")
     def at_least_one_of(self) -> Self:
@@ -659,16 +653,6 @@ class File(StixObservable):
         if self.hashes is None and self.name is None:
             raise ValueError("At least one of hashes or name must be present.")
         return self
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": [
-                "hashes",
-                "name",
-                "extensions",
-                "parent_directory_ref",
-            ]
-        }
 
 
 # 6.8 IPv4 Address Object
@@ -686,9 +670,7 @@ class IPv4Address(StixObservable):
     resolves_to_refs: list[Identifier] | None = None
     # Specifies a list of references to one or more autonomous systems (AS) that the IPv4 address belongs to.
     belongs_to_refs: list[Identifier] | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.9 IPv6 Address Object
@@ -706,9 +688,7 @@ class IPv6Address(StixObservable):
     resolves_to_refs: list[Identifier] | None = None
     # Specifies a list of references to one or more autonomous systems (AS) that the IPv6 address belongs to.
     belongs_to_refs: list[Identifier] | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.10 MAC Address Object
@@ -723,9 +703,7 @@ class MACAddress(StixObservable):
     # include leading zeros for each octet.
     # TODO: check the following regex: ^([0-9a-f]{2}:){5}[0-9a-f]{2}$
     value: str
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.11 Mutex Object
@@ -737,9 +715,7 @@ class Mutex(StixObservable):
     type: Literal["mutex"] = "mutex"  # pyright: ignore[reportIncompatibleVariableOverride]
     # Specifies the name of the mutex object.
     name: str
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["name"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["name"]
 
 
 # 6.12.2 HTTP Request Extension
@@ -923,6 +899,16 @@ class NetworkTraffic(StixObservable):
     encapsulates_refs: list[Identifier] | None = None
     # Links to another network-traffic object which encapsulates this object.
     encapsulated_by_ref: Identifier | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = [
+        "start",
+        "end",
+        "src_ref",
+        "dst_ref",
+        "src_port",
+        "dst_port",
+        "protocols",
+        "extensions",
+    ]
 
     @model_validator(mode="after")
     def validate_end(self) -> Self:
@@ -946,20 +932,6 @@ class NetworkTraffic(StixObservable):
         if self.src_ref is None and self.dst_ref is None:
             raise ValueError("At least one of src_ref or dst_ref must be present")
         return self
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": [
-                "start",
-                "end",
-                "src_ref",
-                "dst_ref",
-                "src_port",
-                "dst_port",
-                "protocols",
-                "extensions",
-            ]
-        }
 
 
 # 6.13.2 Windows Process Extension
@@ -1137,11 +1109,7 @@ class Software(StixObservable):
     vendor: str | None = None
     # Specifies the version of the software.
     version: str | None = None
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["name", "cpe", "swid", "vendor", "version"]
-        }
+    id_contributing_properties: ClassVar[list[str] | None] = ["name", "cpe", "swid", "vendor", "version"]
 
 
 # 6.15 URL Object
@@ -1154,9 +1122,7 @@ class URL(StixObservable):
     # Specifies the value of the URL. The value of this property MUST conform to [RFC3986], more specifically
     # section 1.1.3 with reference to the definition for "Uniform Resource Locator".
     value: StixUrl
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["value"]}
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
 # 6.16.2 UNIX Account Extension
@@ -1252,6 +1218,7 @@ class UserAccount(StixObservable):
     account_first_login: StixTimestamp | None = None
     # Specifies when the account was last accessed.
     account_last_login: StixTimestamp | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = ["account_type", "user_id", "account_login"]
 
     @model_validator(mode="before")
     @classmethod
@@ -1266,11 +1233,6 @@ class UserAccount(StixObservable):
                     return data  # pyright: ignore[reportUnknownVariableType]
             raise ValueError("At least one property must be present")
         raise TypeError("Input data must be a dictionary")
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {
-            "id_contributing_properties": ["account_type", "user_id", "account_login"]
-        }
 
 
 # 6.17.2 Windows Registry Value Type
@@ -1322,6 +1284,7 @@ class WindowsRegistryKey(StixObservable):
     creator_user_ref: Identifier | None = None
     # Specifies the number of subkeys contained under the registry key.
     number_of_subkeys: int | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = ["key", "values"]
 
     @model_validator(mode="before")
     @classmethod
@@ -1336,9 +1299,6 @@ class WindowsRegistryKey(StixObservable):
                     return data  # pyright: ignore[reportUnknownVariableType]
             raise ValueError("At least one property must be present")
         raise TypeError("Input data must be a dictionary")
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["key", "values"]}
 
 
 # 6.18.2 X.509 v3 Extensions Type
@@ -1451,6 +1411,7 @@ class X509Certificate(StixObservable):
     subject_public_key_exponent: int | None = None
     # Specifies any standard X.509 v3 extensions that may be used in the certificate.
     x509_v3_extensions: X509v3ExtensionsType | None = None
+    id_contributing_properties: ClassVar[list[str] | None] = ["hashes", "serial_number"]
 
     @classmethod
     def at_least_one(cls, data: Any) -> Any:  # pyright: ignore[reportExplicitAny, reportAny] # noqa: ANN401
@@ -1464,9 +1425,6 @@ class X509Certificate(StixObservable):
                     return data  # pyright: ignore[reportUnknownVariableType]
             raise ValueError("At least one property must be present")
         raise TypeError("Input data must be a dictionary")
-
-    class Config:
-        json_schema_extra: dict[str, list[str]] = {"id_contributing_properties": ["hashes", "serial_number"]}
 
 
 SCOs = Annotated[
