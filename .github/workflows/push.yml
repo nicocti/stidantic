@@ -8,13 +8,27 @@ on:
             - main
 
 jobs:
-    ruff:
+    linting:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
             - uses: astral-sh/ruff-action@v3
               with:
                   args: check --output-format=github
+
+    typing:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: actions/setup-python@v6
+              with:
+                  python-version-file: "pyproject.toml"
+            - uses: astral-sh/setup-uv@v6
+            - name: Execute tests
+              run: |
+                  uv pip install -r pyproject.toml --extra dev --extra test --system
+                  python3 -m basedpyright
+
     tests:
         runs-on: ubuntu-latest
         steps:
@@ -25,5 +39,5 @@ jobs:
             - uses: astral-sh/setup-uv@v6
             - name: Execute tests
               run: |
-                  uv pip install -r pyproject.toml --extra dev --system
+                  uv pip install -r pyproject.toml --extra test --system
                   python3 -m unittest discover

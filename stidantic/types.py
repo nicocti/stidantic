@@ -1,12 +1,12 @@
 import re
 from datetime import datetime
 from enum import Enum
-from typing import (  # pyright: ignore[reportDeprecated]  # noqa: UP035
+from typing import (  # noqa: UP035
     Annotated,
     Any,
     Literal,
     Self,
-    Type,
+    Type,  # pyright: ignore[reportDeprecated]
     get_args,
 )
 
@@ -78,7 +78,7 @@ type StixUrl = Annotated[AnyUrl, UrlConstraints(preserve_empty_path=True)]
 
 # 2.9 Identifier
 class Identifier(str):
-    __slots__ = ()
+    __slots__ = ()  # pyright: ignore[reportUnannotatedClassAttribute]
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -449,7 +449,7 @@ class StixExtension(StixMeta):
         if self.created > self.modified:
             created = self.created
             modified = self.modified
-            self.created = modified
+            self.created: StixTimestamp = modified
             self.modified = created
             return self
         return self

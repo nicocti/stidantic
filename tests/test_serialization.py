@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from ipaddress import ip_network
 from pathlib import Path
+from typing import Any
 from unittest import TestCase
 
 from deepdiff import DeepDiff
@@ -101,20 +102,21 @@ STIX_OBJECT_MAP = {
 }
 
 
+# pyright: reportAny=false, reportExplicitAny=false
 class TestStixDeserialization(TestCase):
     def test_valid_bundle(self) -> None:
         with Path("tests/data/valid.json").open() as file:
             data = file.read()
         bundle = StixBundle.model_validate_json(data)
         for obj in bundle.objects:
-            self.assertTrue(isinstance(obj, STIX_OBJECT_MAP.get(obj.type, StixCommon)))
+            self.assertTrue(isinstance(obj, STIX_OBJECT_MAP.get(obj.type, StixCommon)))  # pyright: ignore[reportUnnecessaryIsInstance] it is necessary...
 
     def test_valid_objects(self) -> None:
         with Path("tests/data/valid.json").open() as file:
-            data = json.loads(file.read())
+            data: dict[str, Any] = json.loads(file.read())
 
         for obj in data["objects"]:
-            STIX_OBJECT_MAP.get(obj["type"], StixCommon).model_validate(obj)
+            _parsed = STIX_OBJECT_MAP.get(obj["type"], StixCommon).model_validate(obj)
 
 
 class TestStixSerialization(TestCase):
@@ -123,16 +125,16 @@ class TestStixSerialization(TestCase):
             data = json.loads(file.read())
         bundle = StixBundle.model_validate(data).model_dump(mode="json", exclude_none=True, by_alias=True)
         diff = DeepDiff(data, bundle)
-        diff_dict = diff.to_dict()
+        diff_dict: dict[str, Any] = diff.to_dict()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
 
-        for key, value in diff["values_changed"].items():
+        for key, value in diff["values_changed"].items():  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
             try:
-                datetime.fromisoformat(value["old_value"])
+                _parsed = datetime.fromisoformat(value["old_value"])  # pyright: ignore[reportUnknownArgumentType]
                 diff_dict["values_changed"].pop(key)
             except ValueError:
                 pass
             try:
-                ip_network(value["old_value"])
+                _parsed = ip_network(value["old_value"])  # pyright: ignore[reportUnknownArgumentType]
                 diff_dict["values_changed"].pop(key)
             except ValueError:
                 pass

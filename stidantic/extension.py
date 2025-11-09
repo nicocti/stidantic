@@ -107,7 +107,9 @@ class ExtensionDefinition(StixExtension):
         toplevel-property-extension. In other words, when new properties are being added at the
         top-level of an existing object.
         """
-        if self.extension_properties and ExtensionType.toplevel_property_extension.value not in self.extension_types:
+        if (
+            self.extension_properties and ExtensionType.toplevel_property_extension.value not in self.extension_types  # pyright: ignore[reportUnnecessaryContains] because of use_enum_value=True
+        ):
             raise ValueError(
                 "extension_types property can't be used without toplevel-property-extension in extension_types."
             )

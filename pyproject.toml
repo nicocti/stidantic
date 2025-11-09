@@ -43,7 +43,8 @@ licence = "MIT"
 license-files = ["LICENSE"]
 
 [project.optional-dependencies]
-dev = ["deepdiff"]
+dev = ["basedpyright"]
+test = ["deepdiff"]
 
 [project.urls]
 "Homepage" = "https://github.com/nicocti/stidantic"
@@ -62,6 +63,9 @@ include = [
     "/README.md",
     "/LICENSE",
 ]
+
+[tool.pyright]
+strict = ["stidantic/"]
 
 [tool.ruff]
 line-length = 120
