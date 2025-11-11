@@ -1,10 +1,11 @@
 from typing import Annotated, Literal, Self
 
-from pydantic import Field
+from pydantic import AfterValidator, Field
 from pydantic.functional_validators import model_validator
 from pydantic.types import PositiveInt
 
 from stidantic.types import Identifier, StixRelationship, StixTimestamp, StixType
+from stidantic.validators import identifier_of_type
 
 
 # 5.1 Relationship
@@ -130,15 +131,15 @@ class Sighting(StixRelationship):
     # A list of ID references to the Observed Data objects that contain the raw cyber data for this Sighting.
     # For example, a Sighting of an Indicator with an IP address could include the Observed Data for the
     # network connection that the Indicator was used to detect.
-    # This property MUST reference only Observed Data SDOs.
-    observed_data_refs: list[Identifier] | None = None
+    observed_data_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("observed-data"))]] | None = None
     # A list of ID references to the Identity or Location objects describing the entities or types of entities
     # that saw the sighting.
     # Omitting the where_sighted_refs property does not imply that the sighting was seen by the object creator.
     # To indicate that the sighting was seen by the object creator, an Identity representing the object creator
     # should be listed in where_sighted_refs.
-    # This property MUST reference only Identity or Location SDOs.
-    where_sighted_refs: list[Identifier] | None = None
+    where_sighted_refs: (
+        list[Annotated[Identifier, AfterValidator(identifier_of_type("identity", "location"))]] | None
+    ) = None
     # The summary property indicates whether the Sighting should be considered summary data.
     # Summary data is an aggregation of previous Sightings reports and should not be considered primary source data.
     # Default value is false.

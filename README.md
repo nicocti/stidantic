@@ -71,7 +71,7 @@ print(json_output)
 from stidantic.marking import MarkingDefinition
 from stidantic.extensions.pap import PAPExtensionDefinition, PAPExtension
 
-MarkingDefinition.register_new_extension(PAPExtensionDefinition, PAPExtension)
+MarkingDefinition.register_property_extension(PAPExtensionDefinition, PAPExtension)
 data = {
     "extensions": {
         "extension-definition--f8d78575-edfd-406e-8e84-6162a8450f5b": {
@@ -154,7 +154,7 @@ if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
 - ~~Mind the datetime datatype serializer to follow the specification (convert to UTC).~~
 - ~~Implement auto deterministic UUIv5 generation for STIX Identifiers.~~
 - Implement a Indicator to Observable export method (and the other way round ?).
-- Add Generics validation for Identifier properties that must be of some type.
+- ~~Add Generics validation for Identifier properties that must be of some type.~~
 - Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.
 - TAXII 2.1 Server: Build a TAXII 2.1 compliant server using FastAPI.
 - OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) and [stix-common-objects](https://github.com/oasis-open/cti-stix-common-objects) repositories.

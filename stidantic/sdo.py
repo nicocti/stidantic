@@ -1,7 +1,7 @@
 from typing import Annotated, Any, Literal, Self
 
 from annotated_types import Ge, Le
-from pydantic import Field
+from pydantic import AfterValidator, Field
 from pydantic.functional_validators import model_validator
 from typing_extensions import deprecated
 
@@ -12,6 +12,7 @@ from stidantic.types import (
     StixDomain,
     StixTimestamp,
 )
+from stidantic.validators import identifier_of_type
 from stidantic.vocab import OpinionEnum
 
 
@@ -482,7 +483,7 @@ class Malware(StixDomain):
     last_seen: StixTimestamp | None = None
     # The operating systems that the malware family or malware instance is executable on.
     # This applies to virtualized operating systems as well as those running on bare metal.
-    operating_system_refs: list[Identifier] | None = None
+    operating_system_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("software"))]] | None = None
     # The processor architectures (e.g., x86, ARM, etc.) that the malware instance or family is executable on.
     # The values for this property SHOULD come from the processor-architecture-ov open vocabulary.
     architecture_execution_envs: list[str] | None = None
@@ -494,7 +495,7 @@ class Malware(StixDomain):
     capabilities: list[str] | None = None
     # The sample_refs property specifies a list of identifiers of the SCO file or artifact objects associated with
     # this malware instance(s) or family.
-    sample_refs: list[Identifier] | None = None
+    sample_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("file", "artifact"))]] | None = None
 
     @model_validator(mode="after")
     def validate_last_seen_after_first_seen(self) -> Self:
@@ -536,16 +537,13 @@ class MalwareAnalysis(StixDomain):
     # used for the dynamic analysis of the malware instance or family. If this value is not included in conjunction
     # with the operating_system_ref property, this means that the dynamic analysis may have been performed on bare
     # metal (i.e. without virtualization) or the information was redacted.
-    # The value of this property MUST be the identifier for a SCO software object.
-    host_vm_ref: Identifier | None = None
+    host_vm_ref: Annotated[Identifier, AfterValidator(identifier_of_type("software"))] | None = None
     # The operating system used for the dynamic analysis of the malware instance or family. This applies to
     # virtualized operating systems as well as those running on bare metal.
-    # The value of this property MUST be the identifier for a SCO software object.
-    operating_system_ref: Identifier | None = None
+    operating_system_ref: Annotated[Identifier, AfterValidator(identifier_of_type("software"))] | None = None
     # Any non-standard software installed on the operating system (specified through the operating-system value)
     # used for the dynamic analysis of the malware instance or family.
-    # The value of this property MUST be the identifier for a SCO software object.
-    installed_software_refs: list[Identifier] | None = None
+    installed_software_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("software"))]] | None = None
     # The named configuration of additional product configuration parameters for this analysis run. For example, when
     # a product is configured to do full depth analysis of Window™ PE files. This configuration may have a named
     # version and that named version can be captured in this property. This will ensure additional runs can be
@@ -578,7 +576,15 @@ class MalwareAnalysis(StixDomain):
     # Analysis objects when the Malware sample_refs property does not contain the SCO that is included in the
     # Malware Analysis sample_ref property. Note, this property can also contain a reference to an SCO which is not
     # associated with Malware (i.e., some SCO which was scanned and found to be benign.)
-    sample_ref: Identifier | None = None
+    sample_ref: (
+        list[
+            Annotated[
+                Identifier,
+                AfterValidator(identifier_of_type("file", "artifact", "network-traffic")),
+            ]
+        ]
+        | None
+    ) = None
 
     @model_validator(mode="after")
     def at_least_one_of(self) -> Self:

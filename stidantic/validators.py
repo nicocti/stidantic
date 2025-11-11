@@ -1,11 +1,24 @@
+from collections.abc import Callable
+
 from pydantic import ValidationInfo
 
 
-def validate_identifier(value: str) -> str:
-    _type, _uuid = value.split("--")
-    if not _type and not _uuid:
-        raise ValueError("Invalid identifier format.")
+def validate_identifier(value: str, types: tuple[str, ...]) -> str:
+    t = value.split("--")[0]
+    if t not in types:
+        raise ValueError(f"{value} is not one of {types}")
     return value
+
+
+def identifier_of_type(*args: str) -> Callable[..., str]:
+    """
+    Validates that an identifier is of a certain type or types.
+    """
+
+    def validator(value: str) -> str:
+        return validate_identifier(value, args)
+
+    return validator
 
 
 def validate_bin_field(value: str, info: ValidationInfo) -> str:

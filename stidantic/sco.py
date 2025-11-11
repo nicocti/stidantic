@@ -4,7 +4,7 @@ from typing import Annotated, Any, ClassVar, Literal, Self
 from annotated_types import Ge, Le
 from pydantic import Field
 from pydantic.functional_serializers import SerializeAsAny
-from pydantic.functional_validators import model_validator
+from pydantic.functional_validators import AfterValidator, model_validator
 from pydantic.types import JsonValue
 from typing_extensions import TypedDict
 
@@ -18,6 +18,7 @@ from stidantic.types import (
     StixTimestamp,
     StixUrl,
 )
+from stidantic.validators import identifier_of_type
 from stidantic.vocab import (
     EncryptionAlgorithm,
     NetworkSocketAddressFamily,
@@ -137,8 +138,15 @@ class Directory(StixObservable):
     # Specifies the date/time the directory was last accessed.
     atime: StixTimestamp | None = None
     # Specifies a list of references to other File and/or Directory objects contained within the directory.
-    # The objects referenced in this list MUST be of type file or directory.
-    contains_refs: list[Identifier] | None = None
+    contains_refs: (
+        list[
+            Annotated[
+                Identifier,
+                AfterValidator(identifier_of_type("file", "directory")),
+            ]
+        ]
+        | None
+    ) = None
     id_contributing_properties: ClassVar[list[str] | None] = ["path"]
 
 
@@ -158,9 +166,15 @@ class DomainName(StixObservable):
     # domain and sub-domain contained within the domain name MUST conform to [RFC5890].
     value: str
     # Specifies a list of references to one or more IP addresses or domain names that the domain name resolves to.
-    # The objects referenced in this list MUST be of type ipv4-addr or ipv6-addr or domain-name
-    # (for cases such as CNAME records).
-    resolves_to_refs: list[Identifier] | None = None
+    resolves_to_refs: (
+        list[
+            Annotated[
+                Identifier,
+                AfterValidator(identifier_of_type("ipv4-addr", "ipv6-addr", "domain-name")),
+            ]
+        ]
+        | None
+    ) = None
     id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
@@ -178,8 +192,7 @@ class EmailAddress(StixObservable):
     # This property corresponds to the display-name construction in section 3.4 of [RFC5322].
     display_name: str | None = None
     # Specifies the user account that the email address belongs to, as a reference to a User Account object.
-    # The object referenced in this property MUST be of type user-account.
-    belongs_to_ref: Identifier | None = None
+    belongs_to_ref: Annotated[Identifier, AfterValidator(identifier_of_type("user-account"))] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
@@ -199,11 +212,10 @@ class EmailMimeComponent(StixCore):
     body: str | None = None
     # Specifies the contents of non-textual MIME parts, that is those whose content_type does not start with text/,
     # as a reference to an Artifact object or File object.
-    # The object referenced in this property MUST be of type artifact or file.
     # For use cases where conveying the actual data contained in the MIME part is of primary importance,
     # artifact SHOULD be used. Otherwise, for use cases where conveying metadata about the file-like properties of the
     # MIME part is of primary importance, file SHOULD be used.
-    body_raw_ref: Identifier | None = None
+    body_raw_ref: Annotated[Identifier, AfterValidator(identifier_of_type("file", "artifact"))] | None = None
     # Specifies the value of the "Content-Type" header field of the MIME part.
     # Any additional "Content-Type" header field parameters such as charset SHOULD be included in this property.
     content_type: str | None = None
@@ -243,18 +255,18 @@ class EmailMessage(StixObservable):
     # Specifies the value of the "From:" header of the email message.
     # The "From:" field specifies the author of the message, that is, the mailbox(es) of the person or system
     # responsible for the writing of the message.
-    from_ref: Identifier | None = None
+    from_ref: Annotated[Identifier, AfterValidator(identifier_of_type("email-addr"))] | None = None
     # Specifies the value of the "Sender" field of the email message.
     # The "Sender:" field specifies the mailbox of the agent responsible for the actual transmission of the message.
-    sender_ref: Identifier | None = None
+    sender_ref: Annotated[Identifier, AfterValidator(identifier_of_type("email-addr"))] | None = None
     # Specifies the mailboxes that are "To:" recipients of the email message.
-    to_refs: list[Identifier] | None = None
+    to_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("email-addr"))]] | None = None
     # Specifies the mailboxes that are "CC:" recipients of the email message.
-    cc_refs: list[Identifier] | None = None
+    cc_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("email-addr"))]] | None = None
     # Specifies the mailboxes that are "BCC:" recipients of the email message.
     # As per [RFC5322], the absence of this property should not be interpreted as semantically equivalent to an absent
     # BCC header on the message being characterized.
-    bcc_refs: list[Identifier] | None = None
+    bcc_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("email-addr"))]] | None = None
     # Specifies the Message-ID field of the email message.
     message_id: str | None = None
     # Specifies the subject of the email message.
@@ -273,8 +285,8 @@ class EmailMessage(StixObservable):
     # Specifies a list of the MIME parts that make up the email body.
     body_multipart: list[EmailMimeComponent] | None = None
     # Specifies the raw binary contents of the email message, including both the headers and body, as a reference
-    # to an Artifact object. The object referenced in this property MUST be of type artifact.
-    raw_email_ref: Identifier | None = None
+    # to an Artifact object.
+    raw_email_ref: Annotated[Identifier, AfterValidator(identifier_of_type("artifact"))] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = ["from_ref", "subject", "body"]
 
     @model_validator(mode="after")
@@ -299,8 +311,8 @@ class ArchiveFileExtension(Extension):
     """
 
     # This property specifies the files that are contained in the archive. It MUST contain references to one or more
-    # File objects. The objects referenced in this list MUST be of type file or directory.
-    contains_refs: list[Identifier]
+    # File objects.
+    contains_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("file", "directory"))]]
     # Specifies a comment included as part of the archive file.
     comment: str | None = None
 
@@ -631,13 +643,13 @@ class File(StixObservable):
     # Specifies the date/time the file was last accessed.
     atime: StixTimestamp | None = None
     # Specifies the parent directory of the file, as a reference to a Directory object.
-    parent_directory_ref: Identifier | None = None
+    parent_directory_ref: Annotated[Identifier, AfterValidator(identifier_of_type("directory"))] | None = None
     # Specifies a list of references to other Cyber-observable Objects contained within the file, such as another file
     # that is appended to the end of the file, or an IP address that is contained somewhere in the file.
     # This is intended for use cases other than those targeted by the Archive extension.
     contains_refs: list[Identifier] | None = None
     # Specifies the content of the file, represented as an Artifact object.
-    content_ref: Identifier | None = None
+    content_ref: Annotated[Identifier, AfterValidator(identifier_of_type("artifact"))] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = [
         "hashes",
         "name",
@@ -667,9 +679,9 @@ class IPv4Address(StixObservable):
     value: ipaddress.IPv4Address | ipaddress.IPv4Network
     # Specifies a list of references to one or more Layer 2 Media Access Control (MAC) addresses that the IPv4
     # address resolves to.
-    resolves_to_refs: list[Identifier] | None = None
+    resolves_to_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("mac-addr"))]] | None = None
     # Specifies a list of references to one or more autonomous systems (AS) that the IPv4 address belongs to.
-    belongs_to_refs: list[Identifier] | None = None
+    belongs_to_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("autonomous-system"))]] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
@@ -685,9 +697,9 @@ class IPv6Address(StixObservable):
     value: ipaddress.IPv6Address | ipaddress.IPv6Network
     # Specifies a list of references to one or more Layer 2 Media Access Control (MAC) addresses that the IPv6
     # address resolves to.
-    resolves_to_refs: list[Identifier] | None = None
+    resolves_to_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("mac-addr"))]] | None = None
     # Specifies a list of references to one or more autonomous systems (AS) that the IPv6 address belongs to.
-    belongs_to_refs: list[Identifier] | None = None
+    belongs_to_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("autonomous-system"))]] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = ["value"]
 
 
@@ -740,7 +752,7 @@ class HTTPRequestExtension(Extension):
     # Specifies the length of the HTTP message body, if included, in bytes.
     message_body_length: int | None = None
     # Specifies the data contained in the HTTP message body, if included.
-    message_body_data_ref: Identifier | None = None
+    message_body_data_ref: Annotated[Identifier, AfterValidator(identifier_of_type("artifact"))] | None = None
 
 
 # 6.12.3 ICMP Extension
@@ -855,13 +867,15 @@ class NetworkTraffic(StixObservable):
     # Indicates whether the network traffic is still ongoing.
     is_active: bool | None = None
     # Specifies the source of the network traffic, as a reference to a Cyber-observable Object.
-    # The object referenced MUST be of type ipv4-addr, ipv6-addr, mac-addr, or domain-name
-    # (for cases where the IP address for a domain name is unknown).
-    src_ref: Identifier | None = None
+    src_ref: (
+        Annotated[Identifier, AfterValidator(identifier_of_type("ipv4-addr", "ipv6-addr", "mac-addr", "domain-name"))]
+        | None
+    ) = None
     # Specifies the destination of the network traffic, as a reference to a Cyber-observable Object.
-    # The object referenced MUST be of type ipv4-addr, ipv6-addr, mac-addr, or domain-name
-    # (for cases where the IP address for a domain name is unknown).
-    dst_ref: Identifier | None = None
+    dst_ref: (
+        Annotated[Identifier, AfterValidator(identifier_of_type("ipv4-addr", "ipv6-addr", "mac-addr", "domain-name"))]
+        | None
+    ) = None
     # Specifies the source port used in the network traffic, as an integer.
     src_port: Annotated[int, Ge(0), Le(65535)] | None = None
     # Specifies the destination port used in the network traffic, as an integer.
@@ -892,13 +906,21 @@ class NetworkTraffic(StixObservable):
     # as well as a valid IPFIX property.
     ipfix: dict[str, int | str] | None = None
     # Specifies the bytes sent from the source to the destination.
-    src_payload_ref: Identifier | None = None
+    src_payload_ref: Annotated[Identifier, AfterValidator(identifier_of_type("artifact"))] | None = None
     # Specifies the bytes sent from the destination to the source.
-    dst_payload_ref: Identifier | None = None
+    dst_payload_ref: Annotated[Identifier, AfterValidator(identifier_of_type("artifact"))] | None = None
     # Links to other network-traffic objects encapsulated by this network-traffic object.
-    encapsulates_refs: list[Identifier] | None = None
+    encapsulates_refs: (
+        list[
+            Annotated[
+                Identifier,
+                AfterValidator(identifier_of_type("network-traffic")),
+            ]
+        ]
+        | None
+    ) = None
     # Links to another network-traffic object which encapsulates this object.
-    encapsulated_by_ref: Identifier | None = None
+    encapsulated_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("network-traffic"))] | None = None
     id_contributing_properties: ClassVar[list[str] | None] = [
         "start",
         "end",
@@ -996,7 +1018,7 @@ class WindowsServiceExtension(Extension):
     # Specifies the start options defined for the service.
     start_type: WindowsServiceStartType | None = None
     # Specifies the DLLs loaded by the service, as a reference to one or more File objects.
-    service_dll_refs: list[Identifier] | None = None
+    service_dll_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("file"))]] | None = None
     # Specifies the type of the service.
     service_type: WindowsServiceType | None = None
     # Specifies the current status of the service.
@@ -1059,16 +1081,24 @@ class Process(StixObservable):
     environment_variables: dict[str, str] | None = None
     # Specifies the list of network connections opened by the process, as a reference to one or more
     # Network Traffic objects.
-    opened_connection_refs: list[Identifier] | None = None
+    opened_connection_refs: (
+        list[
+            Annotated[
+                Identifier,
+                AfterValidator(identifier_of_type("network-traffic")),
+            ]
+        ]
+        | None
+    ) = None
     # Specifies the user that created the process, as a reference to a User Account object.
-    creator_user_ref: Identifier | None = None
+    creator_user_ref: Annotated[Identifier, AfterValidator(identifier_of_type("user-account"))] | None = None
     # Specifies the executable binary that was executed as the process image, as a reference to a File object.
-    image_ref: Identifier | None = None
+    image_ref: Annotated[Identifier, AfterValidator(identifier_of_type("file"))] | None = None
     # Specifies the other process that spawned (i.e. is the parent of) this one, as a reference to a Process object.
-    parent_ref: Identifier | None = None
+    parent_ref: Annotated[Identifier, AfterValidator(identifier_of_type("process"))] | None = None
     # Specifies the other processes that were spawned by (i.e. children of) this process, as a reference to one
     # or more other Process objects.
-    child_refs: list[Identifier] | None = None
+    child_refs: list[Annotated[Identifier, AfterValidator(identifier_of_type("process"))]] | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -1280,8 +1310,7 @@ class WindowsRegistryKey(StixObservable):
     # Specifies the last date/time that the registry key was modified.
     modified_time: StixTimestamp | None = None
     # Specifies a reference to the user account that created the registry key.
-    # The object referenced in this property MUST be of type user-account.
-    creator_user_ref: Identifier | None = None
+    creator_user_ref: Annotated[Identifier, AfterValidator(identifier_of_type("user-account"))] | None = None
     # Specifies the number of subkeys contained under the registry key.
     number_of_subkeys: int | None = None
     id_contributing_properties: ClassVar[list[str] | None] = ["key", "values"]

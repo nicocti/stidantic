@@ -31,6 +31,7 @@ from typing_extensions import TypedDict
 from stidantic.serializers import ser_datetime
 from stidantic.utils import choose_one_hash
 from stidantic.validators import (
+    identifier_of_type,
     validate_bin_field,
     validate_hex_field,
 )
@@ -225,7 +226,7 @@ class GranularMarking(StixCore):
     # The marking_ref property specifies the ID of the marking-definition object that describes the marking.
     # If the lang property is not present, this property MUST be present. If the lang property is present,
     # this property MUST NOT be present.
-    marking_ref: Identifier | None = None
+    marking_ref: Annotated[Identifier, AfterValidator(identifier_of_type("marking-definition"))] | None = None
     # The selectors property specifies a list of selectors for content contained within the STIX Object in which this
     # property appears. Selectors MUST conform to the syntax defined below. The marking-definition referenced in
     # the marking_ref property is applied to the content selected by the selectors in this list. The [RFC5646] language
@@ -307,7 +308,9 @@ class StixCommon(StixCore):
     external_references: list[ExternalReference] | None = None
     # The object_marking_refs property specifies a list of id properties of marking-definition objects that apply
     # to this object.
-    object_marking_refs: list[Identifier] | None = None
+    object_marking_refs: (
+        list[Annotated[Identifier, AfterValidator(identifier_of_type("marking-definition"))]] | None
+    ) = None
     # The granular_markings property specifies a list of granular markings applied to this object.
     granular_markings: list[GranularMarking] | None = None
     # Specifies any extensions of the object, as a dictionary.
@@ -322,7 +325,7 @@ class StixCommon(StixCore):
     extensions: ExtensionsDict | dict[str, Extension] | None = None
 
     @classmethod
-    def register_new_extension(
+    def register_property_extension(
         cls,
         definition: "StixCommon",  # pyright: ignore[reportUnusedParameter]
         extension: Type[Extension],  # pyright: ignore[reportUnusedParameter, reportDeprecated]  # noqa: UP006
@@ -366,7 +369,7 @@ class StixCommon(StixCore):
 class StixDomain(StixCommon):
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
-    created_by_ref: Identifier | None = None
+    created_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("identity"))] | None = None
     # The created property represents the time at which the object was originally created.
     # The created property MUST NOT be changed when creating a new version of the object.
     created: StixTimestamp
@@ -407,7 +410,7 @@ class StixRelationship(StixCommon):
     modified: StixTimestamp
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
-    created_by_ref: Identifier | None = None
+    created_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("identity"))] | None = None
 
     @model_validator(mode="after")
     def validate_modified_after_created(self) -> Self:
@@ -434,7 +437,7 @@ class StixMeta(StixCommon):
 class StixLanguage(StixMeta):
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
-    created_by_ref: Identifier | None = None
+    created_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("identity"))] | None = None
     # The modified property is only used by STIX Objects that support versioning and represents
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
@@ -455,13 +458,13 @@ class StixLanguage(StixMeta):
 class StixMarking(StixMeta):
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
-    created_by_ref: Identifier | None = None
+    created_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("identity"))] | None = None
 
 
 class StixExtension(StixMeta):
     # The created_by_ref property specifies the id property of the identity object that describes the entity that
     # created this object.
-    created_by_ref: Identifier
+    created_by_ref: Annotated[Identifier, AfterValidator(identifier_of_type("identity"))]
     # The modified property is only used by STIX Objects that support versioning and represents
     # the time that this particular version of the object was last modified.
     # Object creators MUST set the modified property when creating a new
