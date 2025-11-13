@@ -28,6 +28,10 @@ This library leverages [Pydantic](https://docs.pydantic.dev/) to provide:
 - Python 3.12 or later (uses PEP 695 type statements)
 - Pydantic >= 2.12
 
+```sh
+pip install stidantic
+```
+
 ## Quick Start
 
 ### Parsing a STIX Bundle
@@ -87,6 +91,77 @@ pap_green = MarkingDefinition.model_validate(data)
 if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
     print("Extension was parsed & validated by Pydantic.")
 ```
+
+### Handling new object extensions 
+
+```python
+from datetime import datetime
+from typing import ClassVar, Literal
+
+from stidantic.bundle import StixBundle
+from stidantic.extension import ExtensionDefinition
+from stidantic.types import ExtensionType, Identifier, StixObservable
+
+MyNewSCOExtension = ExtensionDefinition(
+    id=Identifier(
+        "extension-definition--1f260414-30ff-4936-b1e0-0b3a02ebff00",
+    ),
+    name="my-new-sco",
+    version="1.0.0",
+    created=datetime.now(),
+    modified=datetime.now(),
+    created_by_ref=Identifier("identity--a984f569-bd93-4d04-8bfc-c4c56b552503"),
+    json_schema="https://github.com/me/myproject/extension-definition--1f260414-30ff-4936-b1e0-0b3a02ebff00.json",
+    extension_types=[ExtensionType.new_sco],
+)
+
+
+class MyNewSCO(StixObservable):
+    id_contributing_properties: ClassVar[list[str] | None] = ["value"]
+
+    type: Literal["my-new-sco"] = "my-new-sco"
+    value: str
+
+
+StixBundle.register_new_object(definition=MyNewSCOExtension, extension=MyNewSCO)
+
+bundle = {
+    "id": "bundle--8d6f7b95-378a-4b0d-8b9c-e253a914b1f7",
+    "objects": [
+        {
+            "type": "my-new-sco",
+            "value": "test",
+        },
+    ],
+}
+
+parsed = StixBundle.model_validate(bundle)
+if isinstance(parsed.objects[0], MyNewSCO):
+    print("Extension was parsed & validated by Pydantic. Deterministic ID was generated.")
+```
+
+### Handling top-level property extensions 
+
+Top-level property extensions are supported as `stidantic` objects supports extra properties natively but are **discouraged**. 
+
+Such extensions won't be tracked in `__stix_extensions__` built-in variable attached to stidantic classes. 
+This means you won't be able to keep track of such extension definitions and cannot easily export those defintions for sharing purposes.
+Extra properties cannot be used for deterministic id generation of STIX cyber-observables.
+Note that any top-level property extension attribute will appear in the `__pydantic_extra__` built-in variable.
+
+```python
+from stidantic.bundle import StixBundle
+
+bundle = {
+    "id": "bundle--f26bbc4b-4233-4e0b-ab5a-276e5cd8109b",
+    "objects": [{"type": "ipv4-addr", "value": "198.52.200.4", "usage": "parking"}],
+}
+parsed = StixBundle.model_validate(bundle)
+print(parsed.model_dump_json(indent=2, exclude_none=True))
+print(parsed.objects[0].__pydantic_extra__)
+```
+
+Beware the STIX standard does not define any name conflict resolution for new STIX Objects or for top-level properties created by the extension mechanism.
 
 ## Implemented STIX Objects
 
@@ -155,7 +230,7 @@ if isinstance(pap_green.extensions[PAPExtensionDefinition.id], PAPExtension):
 - ~~Implement auto deterministic UUIv5 generation for STIX Identifiers.~~
 - Implement a Indicator to Observable export method (and the other way round ?).
 - ~~Add Generics validation for Identifier properties that must be of some type.~~
-- Better STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.
+- ~~STIX Extension Support: Develop a robust and user-friendly mechanism for defining, parsing, and validating custom STIX extensions.~~
 - TAXII 2.1 Server: Build a TAXII 2.1 compliant server using FastAPI.
 - OCA Standard Extensions: Implement STIX extensions from the [Open Cybersecurity Alliance (OCA)](https://github.com/opencybersecurityalliance/stix-extensions) and [stix-common-objects](https://github.com/oasis-open/cti-stix-common-objects) repositories.
 - Performance Tuning: Profile and optimize parsing and serialization.

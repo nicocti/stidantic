@@ -107,6 +107,7 @@ class StixCore(BaseModel):
         frozen=True,
         extra="allow",
     )
+    __stix_extensions__: ClassVar[dict[str, Any]] = {}  # pyright: ignore[reportExplicitAny]
 
 
 # 2.7 Hashes
@@ -327,12 +328,14 @@ class StixCommon(StixCore):
     @classmethod
     def register_property_extension(
         cls,
-        definition: "StixCommon",  # pyright: ignore[reportUnusedParameter]
+        definition: "StixCommon",
         extension: Type[Extension],  # pyright: ignore[reportUnusedParameter, reportDeprecated]  # noqa: UP006
     ) -> None:
         """
         Dynamically update the extensions property so that new classes get deserialized based on the extension key.
         """
+        if ExtensionType.property_extension not in definition.extension_types:  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+            raise ValueError("Extension definition must contain property-extension in the extension_types property")
         annotations = get_args(cls.model_fields["extensions"].annotation)[0]  # pyright: ignore[reportAny, reportUnusedVariable]
         CustomExtensionsDict = TypedDict(
             "CustomExtensionsDict",
@@ -344,6 +347,7 @@ class StixCommon(StixCore):
             extra_items=SerializeAsAny[Extension],
         )
         cls.model_fields["extensions"].annotation = CustomExtensionsDict | None  # pyright: ignore[reportAttributeAccessIssue]
+        cls.__stix_extensions__[definition.id] = definition
         cls.model_rebuild(force=True)  # pyright: ignore[reportUnusedCallResult]
 
     @model_validator(mode="after")
